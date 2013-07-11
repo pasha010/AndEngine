@@ -1,8 +1,8 @@
 package org.andengine.util.progress;
+import org.andengine.util.math.MathUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import org.andengine.util.math.MathUtils;
 
 
 /**
@@ -47,9 +47,9 @@ public class ProgressMonitor implements IProgressListener {
 	@Override
 	public void onProgressChanged(final int pProgress) {
 		final int progressListenerCount = this.mProgressListeners.size();
-		for (int i = 0; i < progressListenerCount; i++) {
-			this.mProgressListeners.get(i).onProgressChanged(pProgress);
-		}
+        for (IProgressListener mProgressListener : this.mProgressListeners) {
+            mProgressListener.onProgressChanged(pProgress);
+        }
 	}
 
 	// ===========================================================

@@ -107,7 +107,7 @@ public class Rectangle extends Shape {
 	}
 
 	@Override
-	protected void onUpdateColor() {
+	protected synchronized void onUpdateColor() {
         if (this.mRectangleVertexBufferObject != null) {
             this.mRectangleVertexBufferObject.onUpdateColor(this);
         }

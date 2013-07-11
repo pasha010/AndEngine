@@ -13,6 +13,7 @@ import org.andengine.util.Constants;
 import org.andengine.util.adt.color.Color;
 import org.andengine.util.adt.color.ColorUtils;
 import org.andengine.util.adt.list.SmartList;
+import org.andengine.util.adt.pool.EntityPool;
 import org.andengine.util.adt.transformation.Transformation;
 import org.andengine.util.algorithm.collision.EntityCollisionChecker;
 import org.andengine.util.call.ParameterCallable;
@@ -120,7 +121,15 @@ public class Entity implements IEntity {
 	private Object mUserData;
     private String mName;
 
-	// ===========================================================
+    /**
+     * for recycling pool of sprites
+     */
+    private         boolean     isPoolSet;
+    private         boolean     isRecycled;
+    private         EntityPool  pool;
+
+
+    // ===========================================================
 	// Constructors
 	// ===========================================================
 
@@ -142,6 +151,8 @@ public class Entity implements IEntity {
 		this.updateLocalCenters();
 
         resetEntityProperties();
+        isRecycled = false;
+        isPoolSet = false;
 	}
 
     /**
@@ -158,6 +169,25 @@ public class Entity implements IEntity {
             this.setColor(Color.WHITE);
             this.reset();
         }
+    }
+
+    public void setPool(EntityPool pool) {
+        this.pool = pool;
+        this.isPoolSet = true;
+    }
+
+    public synchronized void recycle() {
+        if (!isRecycled) {
+            if (this.isPoolSet) {
+                this.setVisible(false);
+                pool.recyclePoolItem(this);
+                isRecycled = true;
+            }
+        }
+    }
+
+    public boolean isPoolSet() {
+        return isPoolSet;
     }
 
 	// ===========================================================
