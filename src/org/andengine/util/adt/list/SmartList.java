@@ -1,10 +1,10 @@
 package org.andengine.util.adt.list;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.andengine.util.IMatcher;
 import org.andengine.util.call.ParameterCallable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -60,7 +60,7 @@ public class SmartList<T> extends ArrayList<T> {
 		return this.get(this.size() - 1);
 	}
 
-	public T get(final IMatcher<T> pMatcher) {
+	public synchronized T get(final IMatcher<T> pMatcher) {
 		final int size = this.size();
 		for (int i = 0; i < size; i++) {
 			final T item = this.get(i);
@@ -83,7 +83,7 @@ public class SmartList<T> extends ArrayList<T> {
 	 * @param pItem the item to remove.
 	 * @param pParameterCallable to be called with the removed item, if it was removed.
 	 */
-	public boolean remove(final T pItem, final ParameterCallable<T> pParameterCallable) {
+	public synchronized boolean remove(final T pItem, final ParameterCallable<T> pParameterCallable) {
 		final boolean removed = this.remove(pItem);
 		if (removed) {
 			pParameterCallable.call(pItem);
@@ -100,7 +100,7 @@ public class SmartList<T> extends ArrayList<T> {
 		return null;
 	}
 
-	public T remove(final IMatcher<T> pMatcher, final ParameterCallable<T> pParameterCallable) {
+	public synchronized T remove(final IMatcher<T> pMatcher, final ParameterCallable<T> pParameterCallable) {
 		for (int i = this.size() - 1; i >= 0; i--) {
 			if (pMatcher.matches(this.get(i))) {
 				final T removed = this.remove(i);
@@ -111,7 +111,7 @@ public class SmartList<T> extends ArrayList<T> {
 		return null;
 	}
 
-	public boolean removeAll(final IMatcher<T> pMatcher) {
+	public synchronized boolean removeAll(final IMatcher<T> pMatcher) {
 		boolean result = false;
 		for (int i = this.size() - 1; i >= 0; i--) {
 			if (pMatcher.matches(this.get(i))) {
@@ -126,8 +126,8 @@ public class SmartList<T> extends ArrayList<T> {
 	 * @param pMatcher to find the items.
 	 * @param pParameterCallable to be called with each matched item after it was removed.
 	 */
-	public boolean removeAll(final IMatcher<T> pMatcher, final ParameterCallable<T> pParameterCallable) {
-		boolean result = false;
+    public synchronized boolean removeAll(final IMatcher<T> pMatcher, final ParameterCallable<T> pParameterCallable) {
+ 		boolean result = false;
 		for (int i = this.size() - 1; i >= 0; i--) {
 			if (pMatcher.matches(this.get(i))) {
 				final T removed = this.remove(i);
@@ -138,7 +138,7 @@ public class SmartList<T> extends ArrayList<T> {
 		return result;
 	}
 
-	public void clear(final ParameterCallable<T> pParameterCallable) {
+	public synchronized void clear(final ParameterCallable<T> pParameterCallable) {
 		for (int i = this.size() - 1; i >= 0; i--) {
 			final T removed = this.remove(i);
 			pParameterCallable.call(removed);
@@ -156,7 +156,7 @@ public class SmartList<T> extends ArrayList<T> {
 		return -1;
 	}
 
-	public int lastIndexOf(final IMatcher<T> pMatcher) {
+	public synchronized int lastIndexOf(final IMatcher<T> pMatcher) {
 		for (int i = this.size() - 1; i >= 0; i--) {
 			final T item = this.get(i);
 			if (pMatcher.matches(item)) {
@@ -187,7 +187,7 @@ public class SmartList<T> extends ArrayList<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <L extends List<S>, S extends T> L queryForSubclass(final IMatcher<T> pMatcher, final L pResult) {
+	public synchronized <L extends List<S>, S extends T> L queryForSubclass(final IMatcher<T> pMatcher, final L pResult) {
 		final int size = this.size();
 		for (int i = 0; i < size; i++) {
 			final T item = this.get(i);
@@ -199,14 +199,14 @@ public class SmartList<T> extends ArrayList<T> {
 		return pResult;
 	}
 
-	public void call(final ParameterCallable<T> pParameterCallable) {
+	public synchronized void call(final ParameterCallable<T> pParameterCallable) {
 		for (int i = this.size() - 1; i >= 0; i--) {
 			final T item = this.get(i);
 			pParameterCallable.call(item);
 		}
 	}
 
-	public void call(final IMatcher<T> pMatcher, final ParameterCallable<T> pParameterCallable) {
+	public synchronized void call(final IMatcher<T> pMatcher, final ParameterCallable<T> pParameterCallable) {
 		for (int i = this.size() - 1; i >= 0; i--) {
 			final T item = this.get(i);
 			if (pMatcher.matches(item)) {

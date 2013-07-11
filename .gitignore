@@ -31,3 +31,7 @@ idea/tasks.xml
 
 # Crashlytics
 res/values/com_crashlytics_export_strings.xml
+
+# built application files & directory
+*.apk
+/out

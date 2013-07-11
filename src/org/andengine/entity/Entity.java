@@ -1,8 +1,5 @@
 package org.andengine.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.UpdateHandlerList;
@@ -19,6 +16,9 @@ import org.andengine.util.adt.list.SmartList;
 import org.andengine.util.adt.transformation.Transformation;
 import org.andengine.util.algorithm.collision.EntityCollisionChecker;
 import org.andengine.util.call.ParameterCallable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -118,6 +118,7 @@ public class Entity implements IEntity {
 	private Transformation mSceneToLocalTransformation;
 
 	private Object mUserData;
+    private String mName;
 
 	// ===========================================================
 	// Constructors
@@ -139,7 +140,25 @@ public class Entity implements IEntity {
 		this.mHeight = pHeight;
 
 		this.updateLocalCenters();
+
+        resetEntityProperties();
 	}
+
+    /**
+     *  reset properties to default values
+     */
+    public void resetEntityProperties() {
+        synchronized (this) {
+            this.clearEntityModifiers();
+            this.setScale(1f);
+            this.clearUpdateHandlers();
+            this.detachChildren();
+            this.detachSelf();
+            this.setAlpha(1f);
+            this.setColor(Color.WHITE);
+            this.reset();
+        }
+    }
 
 	// ===========================================================
 	// Getter & Setter
@@ -889,11 +908,7 @@ public class Entity implements IEntity {
 	@Override
 	public boolean detachSelf() {
 		final IEntity parent = this.mParent;
-		if (parent != null) {
-			return parent.detachChild(this);
-		} else {
-			return false;
-		}
+        return parent != null && parent.detachChild(this);
 	}
 
 	@Override
@@ -1650,11 +1665,12 @@ public class Entity implements IEntity {
 
 		if ((this.mChildren != null) && !this.mChildrenIgnoreUpdate) {
 			final SmartList<IEntity> children = this.mChildren;
-			final int entityCount = children.size();
-			for (int i = 0; i < entityCount; i++) {
-				final IEntity child = children.get(i);
-				child.onUpdate(pSecondsElapsed);
-			}
+            children.call(new ParameterCallable<IEntity>() {
+                @Override
+                public void call(IEntity child) {
+                    child.onUpdate(pSecondsElapsed);
+                }
+            });
 		}
 	}
 
@@ -1750,7 +1766,15 @@ public class Entity implements IEntity {
 		}
 	}
 
-	// ===========================================================
+    public String getName() {
+        return mName;
+    }
+
+    public void setName(String mName) {
+        this.mName = mName;
+    }
+
+    // ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
 }

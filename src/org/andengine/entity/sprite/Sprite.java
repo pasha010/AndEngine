@@ -1,9 +1,11 @@
 package org.andengine.entity.sprite;
 
 import org.andengine.engine.camera.Camera;
+import org.andengine.entity.IEntity;
 import org.andengine.entity.shape.Shape;
 import org.andengine.entity.sprite.vbo.HighPerformanceSpriteVertexBufferObject;
 import org.andengine.entity.sprite.vbo.ISpriteVertexBufferObject;
+import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.shader.PositionColorTextureCoordinatesShaderProgram;
 import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
@@ -54,7 +56,11 @@ public class Sprite extends Shape {
 	protected boolean mFlippedVertical;
 	protected boolean mFlippedHorizontal;
 
-	// ===========================================================
+    /* touch listener */
+    protected IOnSpriteTouch listener;
+
+
+    // ===========================================================
 	// Constructors
 	// ===========================================================
 
@@ -117,7 +123,13 @@ public class Sprite extends Shape {
 		this.onUpdateTextureCoordinates();
 	}
 
-	// ===========================================================
+    @Override
+    public void resetEntityProperties() {
+        super.resetEntityProperties();
+        this.setFlipped(false, false);
+    }
+
+    // ===========================================================
 	// Getter & Setter
 	// ===========================================================
 
@@ -181,7 +193,11 @@ public class Sprite extends Shape {
 		this.getTextureRegion().getTexture().bind(pGLState);
 
 		this.mSpriteVertexBufferObject.bind(pGLState, this.mShaderProgram);
-	}
+
+        /* for nice images */
+        pGLState.enableDither();
+
+    }
 
 	@Override
 	protected void draw(final GLState pGLState, final Camera pCamera) {
@@ -216,4 +232,56 @@ public class Sprite extends Shape {
 	// ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
+
+    public void setListener(IOnSpriteTouch listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+        if (pSceneTouchEvent.isActionDown()) {
+            if (this.listener != null) {
+                listener.onTouchDown(this);
+            }
+        } else if (pSceneTouchEvent.isActionUp()) {
+            if (this.listener != null) {
+                listener.onTouchUp(this);
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void attachChild(IEntity pEntity) throws IllegalStateException {
+        super.attachChild(pEntity);
+    }
+
+    // TODO: проверить эти методы нужны ли вообще
+    /**
+     * center X of sprite in relation to left bottom corner
+     */
+    public float getCenterX() {
+        return (this.getX() + this.getWidth() / 2);
+    }
+
+    /**
+     * center Y of sprite in relation to left bottom corner
+     */
+    public float getCenterY() {
+        return (this.getY() + this.getHeight() / 2);
+    }
+
+    /**
+     * center X of sprite in relation to sprite left bottom corner
+     */
+    public float getLocalCenterX() {
+        return (this.getWidth() / 2);
+    }
+
+    /**
+     * center X of sprite in relation to sprite left bottom corner
+     */
+    public float getLocalCenterY() {
+        return (this.getHeight() / 2);
+    }
 }
