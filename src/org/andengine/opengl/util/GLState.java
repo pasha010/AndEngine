@@ -1,11 +1,9 @@
 package org.andengine.opengl.util;
 
-import java.nio.Buffer;
-import java.nio.ByteOrder;
-import java.util.Arrays;
-
-import javax.microedition.khronos.egl.EGLConfig;
-
+import android.graphics.Bitmap;
+import android.opengl.GLES20;
+import android.opengl.GLUtils;
+import android.opengl.Matrix;
 import org.andengine.BuildConfig;
 import org.andengine.engine.options.RenderOptions;
 import org.andengine.opengl.exception.GLException;
@@ -16,10 +14,10 @@ import org.andengine.opengl.texture.render.RenderTexture;
 import org.andengine.opengl.view.ConfigChooser;
 import org.andengine.util.debug.Debug;
 
-import android.graphics.Bitmap;
-import android.opengl.GLES20;
-import android.opengl.GLUtils;
-import android.opengl.Matrix;
+import javax.microedition.khronos.egl.EGLConfig;
+import java.nio.Buffer;
+import java.nio.ByteOrder;
+import java.util.Arrays;
 
 /**
  * (c) 2010 Nicolas Gramlich
