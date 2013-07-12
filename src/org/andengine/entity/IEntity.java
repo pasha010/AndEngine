@@ -1,5 +1,6 @@
 package org.andengine.entity;
 
+import android.graphics.PointF;
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.IDrawHandler;
@@ -84,6 +85,7 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 	public void setY(final float pY);
 
 	public void setPosition(final IEntity pOtherEntity);
+	public void setPosition(final PointF position);
 	public void setPosition(final float pX, final float pY);
 
 	public float getWidth();

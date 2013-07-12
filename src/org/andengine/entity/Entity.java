@@ -1,5 +1,6 @@
 package org.andengine.entity;
 
+import android.graphics.PointF;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.UpdateHandlerList;
@@ -161,12 +162,10 @@ public class Entity implements IEntity {
     public void resetEntityProperties() {
         synchronized (this) {
             this.clearEntityModifiers();
-            this.setScale(1f);
             this.clearUpdateHandlers();
             this.detachChildren();
             this.detachSelf();
             this.setAlpha(1f);
-            this.setColor(Color.WHITE);
             this.reset();
         }
     }
@@ -357,6 +356,11 @@ public class Entity implements IEntity {
 	public void setPosition(final IEntity pOtherEntity) {
 		this.setPosition(pOtherEntity.getX(), pOtherEntity.getY());
 	}
+
+    @Override
+    public void setPosition(final PointF position) {
+        this.setPosition(position.x, position.y);
+    }
 
 	@Override
 	public void setPosition(final float pX, final float pY) {

@@ -183,8 +183,10 @@ public class Sprite extends Shape {
 	public void reset() {
 		super.reset();
 
-		this.initBlendFunction(this.getTextureRegion().getTexture());
-	}
+        if (this.getTextureRegion() != null) {
+            this.initBlendFunction(this.getTextureRegion().getTexture());
+        }
+    }
 
 	@Override
 	protected void preDraw(final GLState pGLState, final Camera pCamera) {
@@ -218,8 +220,10 @@ public class Sprite extends Shape {
 
 	@Override
 	protected void onUpdateColor() {
-		this.mSpriteVertexBufferObject.onUpdateColor(this);
-	}
+        if (this.mSpriteVertexBufferObject != null) {
+            this.mSpriteVertexBufferObject.onUpdateColor(this);
+        }
+    }
 
 	protected void onUpdateTextureCoordinates() {
 		this.mSpriteVertexBufferObject.onUpdateTextureCoordinates(this);

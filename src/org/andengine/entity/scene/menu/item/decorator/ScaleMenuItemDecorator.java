@@ -1,5 +1,6 @@
 package org.andengine.entity.scene.menu.item.decorator;
 
+import android.graphics.PointF;
 import org.andengine.entity.scene.menu.item.IMenuItem;
 
 /**
@@ -61,7 +62,12 @@ public class ScaleMenuItemDecorator extends BaseMenuItemDecorator {
 		this.setScale(this.mUnselectedScale);
 	}
 
-	// ===========================================================
+    @Override
+    public void setPosition(PointF position) {
+        this.setPosition(position.x, position.y);
+    }
+
+    // ===========================================================
 	// Methods
 	// ===========================================================
 
