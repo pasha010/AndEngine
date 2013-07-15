@@ -127,7 +127,10 @@ public class ButtonSprite extends TiledSprite {
 			this.changeState(State.DISABLED);
 		} else if (pSceneTouchEvent.isActionDown()) {
 			this.changeState(State.PRESSED);
-		} else if (pSceneTouchEvent.isActionCancel() || !this.contains(pSceneTouchEvent.getX(), pSceneTouchEvent.getY())) {
+            if (touchListener != null) {
+                touchListener.onTouchDown(this);
+            }
+        } else if (pSceneTouchEvent.isActionCancel() || !this.contains(pSceneTouchEvent.getX(), pSceneTouchEvent.getY())) {
 			this.changeState(State.NORMAL);
 		} else if (pSceneTouchEvent.isActionUp() && this.mState == State.PRESSED) {
 			this.changeState(State.NORMAL);
@@ -135,6 +138,10 @@ public class ButtonSprite extends TiledSprite {
 			if (this.mOnClickListener != null) {
 				this.mOnClickListener.onClick(this, pTouchAreaLocalX, pTouchAreaLocalY);
 			}
+
+            if (touchListener != null) {
+                touchListener.onTouchUp(this);
+            }
 		}
 
 		return true;
@@ -142,11 +149,7 @@ public class ButtonSprite extends TiledSprite {
 
 	@Override
 	public boolean contains(final float pX, final float pY) {
-		if (!this.isVisible()) {
-			return false;
-		} else {
-			return super.contains(pX, pY);
-		}
+        return this.isVisible() && super.contains(pX, pY);
 	}
 
 	// ===========================================================
@@ -169,7 +172,7 @@ public class ButtonSprite extends TiledSprite {
 		}
 	}
 
-	// ===========================================================
+    // ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
 

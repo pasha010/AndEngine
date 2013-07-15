@@ -1,8 +1,6 @@
 package org.andengine.entity.scene.menu.item.decorator;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import android.graphics.PointF;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.IEntity;
@@ -19,6 +17,9 @@ import org.andengine.opengl.vbo.IVertexBufferObject;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.adt.color.Color;
 import org.andengine.util.adt.transformation.Transformation;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * I HATE THIS CLASS!
@@ -914,7 +915,27 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 		this.mMenuItem.toString(pStringBuilder);
 	}
 
-	// ===========================================================
+    @Override
+    public String getName() {
+        return this.mMenuItem.getName();
+    }
+
+    @Override
+    public void setName(String name) {
+        this.mMenuItem.setName(name);
+    }
+
+    @Override
+    public void setPosition(PointF position) {
+        this.setPosition(position.x, position.y);
+    }
+
+    @Override
+    public IEntity getChildByName(String name) {
+        return this.mMenuItem.getChildByName(name);
+    }
+
+    // ===========================================================
 	// Methods
 	// ===========================================================
 

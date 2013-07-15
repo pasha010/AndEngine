@@ -8,6 +8,7 @@ import org.andengine.entity.modifier.EntityModifierList;
 import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.modifier.IEntityModifier.IEntityModifierMatcher;
 import org.andengine.entity.primitive.Line;
+import org.andengine.entity.sprite.IOnEntityTouch;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.util.GLState;
 import org.andengine.util.Constants;
@@ -68,7 +69,12 @@ public class Entity implements IEntity {
 
 	protected int mZIndex = IEntity.ZINDEX_DEFAULT;
 
-	private IEntity mParent;
+    /**
+     * touch listener
+     */
+    protected IOnEntityTouch touchListener;
+
+    private IEntity mParent;
 
 	protected SmartList<IEntity> mChildren;
 	private EntityModifierList mEntityModifiers;
@@ -247,7 +253,16 @@ public class Entity implements IEntity {
 
 	@Override
 	public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-		return false;
+        if (pSceneTouchEvent.isActionDown()) {
+            if (this.touchListener != null) {
+                return touchListener.onTouchDown(this);
+            }
+        } else if (pSceneTouchEvent.isActionUp()) {
+            if (this.touchListener != null) {
+                return touchListener.onTouchUp(this);
+            }
+        }
+        return touchListener != null;
 	}
 
 	@Override
@@ -842,7 +857,21 @@ public class Entity implements IEntity {
 		return null;
 	}
 
-	@Override
+    @Override
+    public IEntity getChildByName(String name) {
+        if (this.mChildren == null) {
+            return null;
+        }
+        for (int i = this.mChildren.size() - 1; i >= 0; i--) {
+            final IEntity child = this.mChildren.get(i);
+            if (child.getName().equals(name)) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    @Override
 	public IEntity getChildByIndex(final int pIndex) {
 		if (this.mChildren == null) {
 			return null;
@@ -992,11 +1021,8 @@ public class Entity implements IEntity {
 
 	@Override
 	public boolean detachChild(final IEntity pEntity) {
-		if (this.mChildren == null) {
-			return false;
-		}
-		return this.mChildren.remove(pEntity, Entity.PARAMETERCALLABLE_DETACHCHILD);
-	}
+        return this.mChildren != null && this.mChildren.remove(pEntity, Entity.PARAMETERCALLABLE_DETACHCHILD);
+    }
 
 	@Override
 	public IEntity detachChild(final int pTag) {
@@ -1023,11 +1049,8 @@ public class Entity implements IEntity {
 
 	@Override
 	public boolean detachChildren(final IEntityMatcher pEntityMatcher) {
-		if (this.mChildren == null) {
-			return false;
-		}
-		return this.mChildren.removeAll(pEntityMatcher, Entity.PARAMETERCALLABLE_DETACHCHILD);
-	}
+        return this.mChildren != null && this.mChildren.removeAll(pEntityMatcher, Entity.PARAMETERCALLABLE_DETACHCHILD);
+    }
 
 	@Override
 	public void callOnChildren(final IEntityParameterCallable pEntityParameterCallable) {
@@ -1055,19 +1078,13 @@ public class Entity implements IEntity {
 
 	@Override
 	public boolean unregisterUpdateHandler(final IUpdateHandler pUpdateHandler) {
-		if (this.mUpdateHandlers == null) {
-			return false;
-		}
-		return this.mUpdateHandlers.remove(pUpdateHandler);
-	}
+        return this.mUpdateHandlers != null && this.mUpdateHandlers.remove(pUpdateHandler);
+    }
 
 	@Override
 	public boolean unregisterUpdateHandlers(final IUpdateHandlerMatcher pUpdateHandlerMatcher) {
-		if (this.mUpdateHandlers == null) {
-			return false;
-		}
-		return this.mUpdateHandlers.removeAll(pUpdateHandlerMatcher);
-	}
+        return this.mUpdateHandlers != null && this.mUpdateHandlers.removeAll(pUpdateHandlerMatcher);
+    }
 
 	@Override
 	public int getUpdateHandlerCount() {
@@ -1095,19 +1112,13 @@ public class Entity implements IEntity {
 
 	@Override
 	public boolean unregisterEntityModifier(final IEntityModifier pEntityModifier) {
-		if (this.mEntityModifiers == null) {
-			return false;
-		}
-		return this.mEntityModifiers.remove(pEntityModifier);
-	}
+        return this.mEntityModifiers != null && this.mEntityModifiers.remove(pEntityModifier);
+    }
 
 	@Override
 	public boolean unregisterEntityModifiers(final IEntityModifierMatcher pEntityModifierMatcher) {
-		if (this.mEntityModifiers == null) {
-			return false;
-		}
-		return this.mEntityModifiers.removeAll(pEntityModifierMatcher);
-	}
+        return this.mEntityModifiers != null && this.mEntityModifiers.removeAll(pEntityModifierMatcher);
+    }
 
 	@Override
 	public int getEntityModifierCount() {
@@ -1806,6 +1817,10 @@ public class Entity implements IEntity {
 
     public void setName(String mName) {
         this.mName = mName;
+    }
+
+    public void setTouchListener(IOnEntityTouch<? extends Entity> touchListener) {
+        this.touchListener = touchListener;
     }
 
     // ===========================================================

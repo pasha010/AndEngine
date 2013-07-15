@@ -1,19 +1,14 @@
 package org.andengine.entity.scene.menu;
 
-import java.util.ArrayList;
-
+import android.view.MotionEvent;
 import org.andengine.engine.camera.Camera;
-import org.andengine.entity.scene.CameraScene;
-import org.andengine.entity.scene.IOnAreaTouchListener;
-import org.andengine.entity.scene.IOnSceneTouchListener;
-import org.andengine.entity.scene.ITouchArea;
-import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.*;
 import org.andengine.entity.scene.menu.animator.IMenuSceneAnimator;
 import org.andengine.entity.scene.menu.animator.InstantMenuSceneAnimator;
 import org.andengine.entity.scene.menu.item.IMenuItem;
 import org.andengine.input.touch.TouchEvent;
 
-import android.view.MotionEvent;
+import java.util.ArrayList;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -142,7 +137,10 @@ public class MenuScene extends CameraScene implements IOnAreaTouchListener, IOnS
 
 		switch (pSceneTouchEvent.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-			case MotionEvent.ACTION_MOVE:
+                if (touchListener != null) {
+                    touchListener.onTouchDown(this);
+                }
+            case MotionEvent.ACTION_MOVE:
 				if ((this.mSelectedMenuItem != null) && (this.mSelectedMenuItem != menuItem)) {
 					this.mSelectedMenuItem.onUnselected();
 				}
@@ -156,7 +154,11 @@ public class MenuScene extends CameraScene implements IOnAreaTouchListener, IOnS
 					this.mSelectedMenuItem = null;
 					return handled;
 				}
-				break;
+
+                if (touchListener != null) {
+                    touchListener.onTouchUp(this);
+                }
+                break;
 			case MotionEvent.ACTION_CANCEL:
 				menuItem.onUnselected();
 				this.mSelectedMenuItem = null;

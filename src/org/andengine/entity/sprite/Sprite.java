@@ -1,11 +1,11 @@
 package org.andengine.entity.sprite;
 
+import android.opengl.GLES20;
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.shape.Shape;
 import org.andengine.entity.sprite.vbo.HighPerformanceSpriteVertexBufferObject;
 import org.andengine.entity.sprite.vbo.ISpriteVertexBufferObject;
-import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.shader.PositionColorTextureCoordinatesShaderProgram;
 import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.shader.constants.ShaderProgramConstants;
@@ -15,8 +15,6 @@ import org.andengine.opengl.vbo.DrawType;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributesBuilder;
-
-import android.opengl.GLES20;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -55,9 +53,6 @@ public class Sprite extends Shape {
 
 	protected boolean mFlippedVertical;
 	protected boolean mFlippedHorizontal;
-
-    /* touch listener */
-    protected IOnSpriteTouch listener;
 
 
     // ===========================================================
@@ -236,24 +231,6 @@ public class Sprite extends Shape {
 	// ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
-
-    public void setListener(IOnSpriteTouch listener) {
-        this.listener = listener;
-    }
-
-    @Override
-    public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-        if (pSceneTouchEvent.isActionDown()) {
-            if (this.listener != null) {
-                listener.onTouchDown(this);
-            }
-        } else if (pSceneTouchEvent.isActionUp()) {
-            if (this.listener != null) {
-                listener.onTouchUp(this);
-            }
-        }
-        return true;
-    }
 
     @Override
     public void attachChild(IEntity pEntity) throws IllegalStateException {

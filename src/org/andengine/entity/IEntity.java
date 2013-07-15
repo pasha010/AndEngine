@@ -70,6 +70,9 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 	public int getTag();
 	public void setTag(final int pTag);
 
+    public String getName();
+    public void setName(final String name);
+
 	public int getZIndex();
 	public void setZIndex(final int pZIndex);
 
@@ -298,6 +301,7 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 	public void attachChild(final IEntity pEntity);
 
 	public IEntity getChildByTag(final int pTag);
+	public IEntity getChildByName(final String name);
 	public IEntity getChildByMatcher(final IEntityMatcher pEntityMatcher);
 	public IEntity getChildByIndex(final int pIndex);
 	public IEntity getFirstChild();
