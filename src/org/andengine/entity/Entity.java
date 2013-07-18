@@ -386,7 +386,12 @@ public class Entity implements IEntity {
 		this.mParentToLocalTransformationDirty = true;
 	}
 
-	@Override
+    @Override
+    public void setPositionInCenterOfEntity(IEntity parent) {
+        this.setPosition(0.5f * parent.getWidth(), 0.5f * parent.getHeight());
+    }
+
+    @Override
 	public float getWidth() {
 		return this.mWidth;
 	}
@@ -902,6 +907,11 @@ public class Entity implements IEntity {
 		}
 		return this.mChildren.get(this.mChildren.size() - 1);
 	}
+
+    @Override
+    public SmartList<IEntity> getChildren() {
+        return mChildren;
+    }
 
 	@Override
 	public ArrayList<IEntity> query(final IEntityMatcher pEntityMatcher) {

@@ -12,6 +12,7 @@ import org.andengine.entity.scene.ITouchArea;
 import org.andengine.entity.scene.Scene;
 import org.andengine.util.IDisposable;
 import org.andengine.util.adt.color.Color;
+import org.andengine.util.adt.list.SmartList;
 import org.andengine.util.adt.transformation.Transformation;
 
 import java.util.ArrayList;
@@ -89,7 +90,9 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 
 	public void setPosition(final IEntity pOtherEntity);
 	public void setPosition(final PointF position);
-	public void setPosition(final float pX, final float pY);
+    public void setPosition(final float pX, final float pY);
+
+    public void setPositionInCenterOfEntity(final IEntity parent);
 
 	public float getWidth();
 	public float getHeight();
@@ -306,6 +309,7 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 	public IEntity getChildByIndex(final int pIndex);
 	public IEntity getFirstChild();
 	public IEntity getLastChild();
+    public SmartList<IEntity> getChildren();
 
 	/**
 	 * @param pEntityMatcher

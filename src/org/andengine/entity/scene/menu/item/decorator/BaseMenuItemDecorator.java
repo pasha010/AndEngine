@@ -16,6 +16,7 @@ import org.andengine.opengl.util.GLState;
 import org.andengine.opengl.vbo.IVertexBufferObject;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.adt.color.Color;
+import org.andengine.util.adt.list.SmartList;
 import org.andengine.util.adt.transformation.Transformation;
 
 import java.util.ArrayList;
@@ -118,7 +119,12 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 		this.mMenuItem.setPosition(pX, pY);
 	}
 
-	@Override
+    @Override
+    public void setPositionInCenterOfEntity(final IEntity parent) {
+        this.mMenuItem.setPositionInCenterOfEntity(parent);
+    }
+
+    @Override
 	public float getWidth() {
 		return this.mMenuItem.getWidth();
 	}
@@ -695,7 +701,12 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 		return this.mMenuItem.getChildByMatcher(pEntityMatcher);
 	}
 
-	@Override
+    @Override
+    public SmartList<IEntity> getChildren() {
+        return this.mMenuItem.getChildren();
+    }
+
+    @Override
 	public ArrayList<IEntity> query(final IEntityMatcher pEntityMatcher) {
 		return this.mMenuItem.query(pEntityMatcher);
 	}
