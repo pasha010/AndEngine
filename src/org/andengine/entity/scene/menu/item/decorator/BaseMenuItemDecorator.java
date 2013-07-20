@@ -17,6 +17,7 @@ import org.andengine.opengl.vbo.IVertexBufferObject;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.adt.color.Color;
 import org.andengine.util.adt.list.SmartList;
+import org.andengine.util.adt.pool.EntityPool;
 import org.andengine.util.adt.transformation.Transformation;
 
 import java.util.ArrayList;
@@ -944,6 +945,26 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
     @Override
     public IEntity getChildByName(String name) {
         return this.mMenuItem.getChildByName(name);
+    }
+
+    @Override
+    public void resetEntityProperties() {
+        this.mMenuItem.resetEntityProperties();
+    }
+
+    @Override
+    public void setPool(EntityPool pool) {
+        this.mMenuItem.setPool(pool);
+    }
+
+    @Override
+    public void recycle() {
+        this.mMenuItem.recycle();
+    }
+
+    @Override
+    public boolean isPoolSet() {
+        return this.mMenuItem.isPoolSet();
     }
 
     // ===========================================================

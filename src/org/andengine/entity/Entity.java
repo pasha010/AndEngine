@@ -165,6 +165,7 @@ public class Entity implements IEntity {
     /**
      *  reset properties to default values
      */
+    @Override
     public void resetEntityProperties() {
         synchronized (this) {
             this.clearEntityModifiers();
@@ -176,11 +177,13 @@ public class Entity implements IEntity {
         }
     }
 
+    @Override
     public void setPool(EntityPool pool) {
         this.pool = pool;
         this.isPoolSet = true;
     }
 
+    @Override
     public synchronized void recycle() {
         if (!isRecycled) {
             if (this.isPoolSet) {
@@ -191,6 +194,7 @@ public class Entity implements IEntity {
         }
     }
 
+    @Override
     public boolean isPoolSet() {
         return isPoolSet;
     }

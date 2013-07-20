@@ -13,6 +13,7 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.util.IDisposable;
 import org.andengine.util.adt.color.Color;
 import org.andengine.util.adt.list.SmartList;
+import org.andengine.util.adt.pool.EntityPool;
 import org.andengine.util.adt.transformation.Transformation;
 
 import java.util.ArrayList;
@@ -434,7 +435,15 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 
 	public void toString(final StringBuilder pStringBuilder);
 
-	// ===========================================================
+    void resetEntityProperties();
+
+    void setPool(EntityPool pool);
+
+    void recycle();
+
+    boolean isPoolSet();
+
+    // ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
 }
