@@ -303,6 +303,8 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 	public void onDetached();
 
 	public void attachChild(final IEntity pEntity);
+	public void attachChild(final IEntity pEntity, final int zIndex);
+	public void attachChildren(final IEntity ... pEntities);
 
 	public IEntity getChildByTag(final int pTag);
 	public IEntity getChildByName(final String name);
@@ -311,6 +313,7 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 	public IEntity getFirstChild();
 	public IEntity getLastChild();
     public SmartList<IEntity> getChildren();
+    public boolean containChild(String childName);
 
 	/**
 	 * @param pEntityMatcher

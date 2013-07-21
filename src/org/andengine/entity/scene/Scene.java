@@ -16,6 +16,9 @@ import org.andengine.util.adt.list.SmartList;
 
 import android.util.SparseArray;
 
+import java.util.Collections;
+import java.util.Comparator;
+
 /**
  * (c) 2010 Nicolas Gramlich
  * (c) 2011 Zynga Inc.
@@ -350,20 +353,19 @@ public class Scene extends Entity {
 			final int touchAreaCount = touchAreas.size();
 			if (touchAreaCount > 0) {
 				if (this.mOnAreaTouchTraversalBackToFront) { /* Back to Front. */
-					for (int i = 0; i < touchAreaCount; i++) {
-						final ITouchArea touchArea = touchAreas.get(i);
-						if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
-							final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, touchArea);
-							if (handled != null && handled) {
-								/* If binding of ITouchAreas is enabled and this is an ACTION_DOWN event,
+                    for (final ITouchArea touchArea : touchAreas) {
+                        if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
+                            final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, touchArea);
+                            if (handled != null && handled) {
+                                /* If binding of ITouchAreas is enabled and this is an ACTION_DOWN event,
 								 * bind this ITouchArea to the PointerID. */
-								if ((this.mTouchAreaBindingOnActionDownEnabled && isActionDown) || (this.mTouchAreaBindingOnActionMoveEnabled && isActionMove)) {
-									this.mTouchAreaBindings.put(pSceneTouchEvent.getPointerID(), touchArea);
-								}
-								return true;
-							}
-						}
-					}
+                                if ((this.mTouchAreaBindingOnActionDownEnabled && isActionDown) || (this.mTouchAreaBindingOnActionMoveEnabled && isActionMove)) {
+                                    this.mTouchAreaBindings.put(pSceneTouchEvent.getPointerID(), touchArea);
+                                }
+                                return true;
+                            }
+                        }
+                    }
 				} else { /* Front to back. */
 					for (int i = touchAreaCount - 1; i >= 0; i--) {
 						final ITouchArea touchArea = touchAreas.get(i);
@@ -441,9 +443,31 @@ public class Scene extends Entity {
 
 	public void registerTouchArea(final ITouchArea pTouchArea) {
 		this.mTouchAreas.add(pTouchArea);
+        sortTouchAreas();
 	}
 
-	public boolean unregisterTouchArea(final ITouchArea pTouchArea) {
+    /**
+     * sort touch areas by z-index
+     * entity with biggest z-index - first in array
+     * entity with smallest z-index - last in array
+     */
+    private void sortTouchAreas() {
+        Collections.sort(mTouchAreas, new Comparator<ITouchArea>() {
+            @Override
+            public int compare(ITouchArea first, ITouchArea second) {
+                if (first instanceof IEntity && second instanceof IEntity) {
+                    IEntity firstEntity = (IEntity) first;
+                    IEntity secondEntity = (IEntity) second;
+
+                    return  secondEntity.getZIndex() - firstEntity.getZIndex();
+                }
+
+                return 0;
+            }
+        });
+    }
+
+    public boolean unregisterTouchArea(final ITouchArea pTouchArea) {
 		return this.mTouchAreas.remove(pTouchArea);
 	}
 

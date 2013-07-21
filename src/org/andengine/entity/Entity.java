@@ -36,16 +36,17 @@ public class Entity implements IEntity {
 	// Constants
 	// ===========================================================
 
-	private static final int CHILDREN_CAPACITY_DEFAULT = 4;
-	private static final int ENTITYMODIFIERS_CAPACITY_DEFAULT = 4;
+    public  static final String DEFAULT_NAME = "child";
+    private static final int CHILDREN_CAPACITY_DEFAULT = 4;
+    private static final int ENTITYMODIFIERS_CAPACITY_DEFAULT = 4;
+
 	private static final int UPDATEHANDLERS_CAPACITY_DEFAULT = 4;
+    private static final float[] VERTICES_SCENE_TO_LOCAL_TMP = new float[2];
+    private static final float[] VERTICES_LOCAL_TO_SCENE_TMP = new float[2];
+    private static final float[] VERTICES_PARENT_TO_LOCAL_TMP = new float[2];
 
-	private static final float[] VERTICES_SCENE_TO_LOCAL_TMP = new float[2];
-	private static final float[] VERTICES_LOCAL_TO_SCENE_TMP = new float[2];
-	private static final float[] VERTICES_PARENT_TO_LOCAL_TMP = new float[2];
 	private static final float[] VERTICES_LOCAL_TO_PARENT_TMP = new float[2];
-
-	private static final ParameterCallable<IEntity> PARAMETERCALLABLE_DETACHCHILD = new ParameterCallable<IEntity>() {
+    private static final ParameterCallable<IEntity> PARAMETERCALLABLE_DETACHCHILD = new ParameterCallable<IEntity>() {
 		@Override
 		public void call(final IEntity pEntity) {
 			pEntity.setParent(null);
@@ -53,7 +54,7 @@ public class Entity implements IEntity {
 		}
 	};
 
-	// ===========================================================
+    // ===========================================================
 	// Fields
 	// ===========================================================
 
@@ -155,11 +156,16 @@ public class Entity implements IEntity {
 		this.mWidth = pWidth;
 		this.mHeight = pHeight;
 
+        this.mName  = DEFAULT_NAME;
+
 		this.updateLocalCenters();
+
+        allocateChildren();
 
         resetEntityProperties();
         isRecycled = false;
         isPoolSet = false;
+
 	}
 
     /**
@@ -868,11 +874,7 @@ public class Entity implements IEntity {
 
     @Override
     public IEntity getChildByName(String name) {
-        if (this.mChildren == null) {
-            return null;
-        }
-        for (int i = this.mChildren.size() - 1; i >= 0; i--) {
-            final IEntity child = this.mChildren.get(i);
+        for (final IEntity child : this.mChildren) {
             if (child.getName().equals(name)) {
                 return child;
             }
@@ -917,7 +919,17 @@ public class Entity implements IEntity {
         return mChildren;
     }
 
-	@Override
+    @Override
+    public boolean containChild(String childName) {
+        for (final IEntity child : this.mChildren) {
+            if (child.getName().equals(childName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
 	public ArrayList<IEntity> query(final IEntityMatcher pEntityMatcher) {
 		return this.query(pEntityMatcher, new ArrayList<IEntity>());
 	}
@@ -998,17 +1010,29 @@ public class Entity implements IEntity {
 
 	@Override
 	public void attachChild(final IEntity pEntity) throws IllegalStateException {
-		this.assertEntityHasNoParent(pEntity);
-
-		if (this.mChildren == null) {
-			this.allocateChildren();
-		}
-		this.mChildren.add(pEntity);
-		pEntity.setParent(this);
-		pEntity.onAttached();
+		this.attachChild(pEntity, pEntity.getZIndex());
 	}
 
-	@Override
+    @Override
+    public void attachChild(IEntity pEntity, int zIndex) {
+        this.assertEntityHasNoParent(pEntity);
+
+        if (this.mChildren == null) {
+            this.allocateChildren();
+        }
+        this.mChildren.add(pEntity);
+        pEntity.setParent(this);
+        pEntity.onAttached();
+    }
+
+    @Override
+    public void attachChildren(IEntity... pEntities) {
+        for (IEntity entity : pEntities) {
+            this.attachChild(entity);
+        }
+    }
+
+    @Override
 	public void sortChildren() {
 		this.sortChildren(true);
 	}

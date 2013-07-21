@@ -678,7 +678,17 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 		this.mMenuItem.attachChild(pEntity);
 	}
 
-	@Override
+    @Override
+    public void attachChild(final IEntity pEntity, final int zIndex) {
+        this.mMenuItem.attachChild(pEntity, zIndex);
+    }
+
+    @Override
+    public void attachChildren(IEntity... pEntities) {
+        this.mMenuItem.attachChildren(pEntities);
+    }
+
+    @Override
 	public IEntity getFirstChild() {
 		return this.mMenuItem.getFirstChild();
 	}
@@ -705,6 +715,11 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
     @Override
     public SmartList<IEntity> getChildren() {
         return this.mMenuItem.getChildren();
+    }
+
+    @Override
+    public boolean containChild(String childName) {
+        return this.mMenuItem.containChild(childName);
     }
 
     @Override
