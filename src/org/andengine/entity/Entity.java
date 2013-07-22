@@ -406,7 +406,6 @@ public class Entity implements IEntity {
 		return this.mWidth;
 	}
 
-	@Deprecated
 	@Override
 	public float getWidthScaled() {
 		return this.mWidth * this.mScaleX;
@@ -424,7 +423,6 @@ public class Entity implements IEntity {
 		return this.mHeight;
 	}
 
-	@Deprecated
 	@Override
 	public float getHeightScaled() {
 		return this.mHeight * this.mScaleY;
