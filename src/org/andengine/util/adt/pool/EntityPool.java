@@ -10,7 +10,6 @@ public abstract class EntityPool<E extends Entity, T extends ITextureRegion> ext
 
     @Override
     protected void onHandleRecycleItem(final E pItem) {
-        pItem.detachSelf();
         pItem.detachChildren();
     }
 
