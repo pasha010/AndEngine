@@ -97,18 +97,7 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 
 	public float getWidth();
 	public float getHeight();
-
-	/**
-	 * It is very likely you do NOT want to use this method!
-	 * @return
-	 */
-	@Deprecated
 	public float getWidthScaled();
-	/**
-	 * It is very likely you do NOT want to use this method!
-	 * @return
-	 */
-	@Deprecated
 	public float getHeightScaled();
 
 	public void setHeight(final float pHeight);
