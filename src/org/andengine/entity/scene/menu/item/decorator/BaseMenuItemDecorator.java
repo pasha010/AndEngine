@@ -121,8 +121,8 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 	}
 
     @Override
-    public void setPositionInCenterOfEntity(final IEntity parent) {
-        this.mMenuItem.setPositionInCenterOfEntity(parent);
+    public void setInCenterOfEntity(final IEntity parent) {
+        this.mMenuItem.setInCenterOfEntity(parent);
     }
 
     @Override

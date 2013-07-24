@@ -93,7 +93,7 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 	public void setPosition(final PointF position);
     public void setPosition(final float pX, final float pY);
 
-    public void setPositionInCenterOfEntity(final IEntity parent);
+    public void setInCenterOfEntity(final IEntity parent);
 
 	public float getWidth();
 	public float getHeight();

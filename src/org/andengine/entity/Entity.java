@@ -397,7 +397,7 @@ public class Entity implements IEntity {
 	}
 
     @Override
-    public void setPositionInCenterOfEntity(IEntity parent) {
+    public void setInCenterOfEntity(IEntity parent) {
         this.setPosition(0.5f * parent.getWidth(), 0.5f * parent.getHeight());
     }
 
