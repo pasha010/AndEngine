@@ -373,10 +373,6 @@ public class Scene extends Entity {
 				if (this.mOnAreaTouchTraversalBackToFront) { /* Back to Front. */
                     for (final ITouchArea touchArea : touchAreas) {
                         if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
-                            Log.i("mish","sel="+selectedEntity);
-                            Log.i("mish","actionUp "+pSceneTouchEvent.isActionUp()+"; actionDown "+isActionDown);
-
-
                             if (this.mTouchAreaBindingOnActionDownEnabled && isActionDown) {
                                 if (selectedEntity == null) {
                                     selectedEntity = (IEntity) touchArea;
