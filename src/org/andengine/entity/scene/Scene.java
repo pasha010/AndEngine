@@ -1,5 +1,6 @@
 package org.andengine.entity.scene;
 
+import android.util.Log;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.runnable.RunnableHandler;
 import org.andengine.entity.Entity;
@@ -63,6 +64,7 @@ public class Scene extends Entity {
 	private final SparseArray<ITouchArea> mTouchAreaBindings = new SparseArray<ITouchArea>();
 	private boolean mOnSceneTouchListenerBindingOnActionDownEnabled = false;
 	private final SparseArray<IOnSceneTouchListener> mOnSceneTouchListenerBindings = new SparseArray<IOnSceneTouchListener>();
+    private IEntity selectedEntity;
 
 	// ===========================================================
 	// Constructors
@@ -295,6 +297,7 @@ public class Scene extends Entity {
 		final int action = pSceneTouchEvent.getAction();
 		final boolean isActionDown = pSceneTouchEvent.isActionDown();
 		final boolean isActionMove = pSceneTouchEvent.isActionMove();
+        SmartList<ITouchArea> touchAreas;
 
 		if (!isActionDown) {
 			if (this.mOnSceneTouchListenerBindingOnActionDownEnabled) {
@@ -307,9 +310,9 @@ public class Scene extends Entity {
 							this.mOnSceneTouchListenerBindings.remove(pSceneTouchEvent.getPointerID());
 					}
 					final Boolean handled = this.mOnSceneTouchListener.onSceneTouchEvent(this, pSceneTouchEvent);
-					if (handled != null && handled) {
-						return true;
-					}
+                    if (handled != null && handled) {
+                        return true;
+                    }
 				}
 			}
 			if (this.mTouchAreaBindingOnActionDownEnabled) {
@@ -324,13 +327,29 @@ public class Scene extends Entity {
 					/* Check if boundTouchArea needs to be removed. */
 					switch (action) {
 						case TouchEvent.ACTION_UP:
-						case TouchEvent.ACTION_CANCEL:
+                        case TouchEvent.ACTION_CANCEL:
 							touchAreaBindings.remove(pSceneTouchEvent.getPointerID());
 					}
-					final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, boundTouchArea);
-					if (handled != null && handled) {
-						return true;
-					}
+                    touchAreas = this.mTouchAreas;
+                    if (touchAreas != null) {
+                        for (final ITouchArea touchArea : touchAreas) {
+                            if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
+                                if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
+                                    if (pSceneTouchEvent.isActionUp()) {
+                                        if (selectedEntity != null && !selectedEntity.equals(touchArea)) {
+                                            selectedEntity = null;
+                                            return true;
+                                        }
+                                        selectedEntity = null;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, boundTouchArea);
+                    if (handled != null && handled) {
+                        return true;
+                    }
 				}
 			}
 		}
@@ -344,22 +363,29 @@ public class Scene extends Entity {
 				return false;
 			}
 		}
-
-		final float sceneTouchEventX = pSceneTouchEvent.getX();
+        final float sceneTouchEventX = pSceneTouchEvent.getX();
 		final float sceneTouchEventY = pSceneTouchEvent.getY();
 
-		final SmartList<ITouchArea> touchAreas = this.mTouchAreas;
-		if (touchAreas != null) {
+		touchAreas = this.mTouchAreas;
+        if (touchAreas != null) {
 			final int touchAreaCount = touchAreas.size();
 			if (touchAreaCount > 0) {
 				if (this.mOnAreaTouchTraversalBackToFront) { /* Back to Front. */
                     for (final ITouchArea touchArea : touchAreas) {
                         if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
+                            if (this.mTouchAreaBindingOnActionDownEnabled && isActionDown) {
+                                if (selectedEntity == null) {
+                                    selectedEntity = (IEntity) touchArea;
+                                }
+                            }
+
                             final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, touchArea);
                             if (handled != null && handled) {
                                 /* If binding of ITouchAreas is enabled and this is an ACTION_DOWN event,
 								 * bind this ITouchArea to the PointerID. */
-                                if ((this.mTouchAreaBindingOnActionDownEnabled && isActionDown) || (this.mTouchAreaBindingOnActionMoveEnabled && isActionMove)) {
+                                if ( (this.mTouchAreaBindingOnActionDownEnabled && isActionDown)
+                                  || (this.mTouchAreaBindingOnActionMoveEnabled && isActionMove)) {
+
                                     this.mTouchAreaBindings.put(pSceneTouchEvent.getPointerID(), touchArea);
                                 }
                                 return true;
@@ -371,13 +397,13 @@ public class Scene extends Entity {
 						final ITouchArea touchArea = touchAreas.get(i);
 						if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
 							final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, touchArea);
-							if (handled != null && handled) {
+                            if (handled != null && handled) {
 								/* If binding of ITouchAreas is enabled and this is an ACTION_DOWN event,
 								 * bind this ITouchArea to the PointerID. */
-								if ((this.mTouchAreaBindingOnActionDownEnabled && isActionDown) || (this.mTouchAreaBindingOnActionMoveEnabled && isActionMove)) {
-									this.mTouchAreaBindings.put(pSceneTouchEvent.getPointerID(), touchArea);
-								}
-								return true;
+                                if ((this.mTouchAreaBindingOnActionDownEnabled && isActionDown) || (this.mTouchAreaBindingOnActionMoveEnabled && isActionMove)) {
+                                    this.mTouchAreaBindings.put(pSceneTouchEvent.getPointerID(), touchArea);
+                                }
+                                return true;
 							}
 						}
 					}
@@ -393,6 +419,7 @@ public class Scene extends Entity {
 				if (this.mOnSceneTouchListenerBindingOnActionDownEnabled && isActionDown) {
 					this.mOnSceneTouchListenerBindings.put(pSceneTouchEvent.getPointerID(), this.mOnSceneTouchListener);
 				}
+                selectedEntity = null;
 				return true;
 			} else {
 				return false;
