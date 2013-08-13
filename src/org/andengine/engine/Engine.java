@@ -250,7 +250,7 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			}
 
 			this.mRunning = false;
-            childOnEnterHandler = null;
+            setNullChildOnEnterHandler();
 		}
 	}
 
