@@ -1,6 +1,7 @@
 package org.andengine.entity;
 
 import android.graphics.PointF;
+import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.UpdateHandlerList;
@@ -129,13 +130,14 @@ public class Entity implements IEntity {
 	private Object mUserData;
     private String mName;
 
+    private OnEnterHandler onEnterHandler;
+
     /**
      * for recycling pool of sprites
      */
     private         boolean     isPoolSet;
     private         boolean     isRecycled;
     private         EntityPool  pool;
-
 
     // ===========================================================
 	// Constructors
@@ -1533,7 +1535,7 @@ public class Entity implements IEntity {
 		}
 	}
 
-	@Override
+    @Override
 	public void dispose() {
 		if (!this.mDisposed) {
 			this.mDisposed = true;
@@ -1737,7 +1739,11 @@ public class Entity implements IEntity {
 	}
 
 	protected void onManagedUpdate(final float pSecondsElapsed) {
-		if (this.mEntityModifiers != null) {
+        if (invokeOnEnter()) {
+            onEnterHandler.onEnter();
+        }
+
+        if (this.mEntityModifiers != null) {
 			this.mEntityModifiers.onUpdate(pSecondsElapsed);
 		}
 		if (this.mUpdateHandlers != null) {
@@ -1754,6 +1760,14 @@ public class Entity implements IEntity {
             });
 		}
 	}
+
+    private boolean invokeOnEnter() {
+        boolean isEngineAllowInvoking = Engine.getChildOnEnterHandler() != null
+                && Engine.getChildOnEnterHandler().handleOnEnterByChildren() != null
+                && Engine.getChildOnEnterHandler().handleOnEnterByChildren();
+        boolean isOnEnterHandlerRegister = onEnterHandler != null;
+        return isEngineAllowInvoking && isOnEnterHandlerRegister;
+    }
 
 	protected void updateLocalCenters() {
 		this.updateLocalCenterXs();
@@ -1859,7 +1873,17 @@ public class Entity implements IEntity {
         this.touchListener = touchListener;
     }
 
+    public void registerOnEnterHandler(OnEnterHandler onEnterHandler) {
+        this.onEnterHandler = onEnterHandler;
+    }
+
     // ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
+    public interface OnEnterHandler {
+        /**
+         * when entity is showed on screen we handle this event
+         */
+        public void onEnter();
+    }
 }

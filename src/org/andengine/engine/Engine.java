@@ -1,15 +1,26 @@
 package org.andengine.engine;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
+import android.os.Bundle;
+import android.os.Vibrator;
+import android.view.Display;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
+import android.view.WindowManager;
 import org.andengine.BuildConfig;
 import org.andengine.audio.music.MusicFactory;
 import org.andengine.audio.music.MusicManager;
 import org.andengine.audio.sound.SoundFactory;
 import org.andengine.audio.sound.SoundManager;
-import org.andengine.audio.sound.exception.SoundException;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.DrawHandlerList;
 import org.andengine.engine.handler.IDrawHandler;
@@ -43,22 +54,9 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.time.TimeConstants;
 
-import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.location.LocationProvider;
-import android.os.Bundle;
-import android.os.Vibrator;
-import android.view.Display;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnTouchListener;
-import android.view.WindowManager;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -125,11 +123,49 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 	protected int mSurfaceWidth = 1; // 1 to prevent accidental DIV/0
 	protected int mSurfaceHeight = 1; // 1 to prevent accidental DIV/0
 
-	// ===========================================================
+    private static volatile ChildOnEnterHandler childOnEnterHandler;
+
+    /**
+     * для обработки ивентов, когда впервые показываем леер или сцену
+     * аналог cocos2d
+     */
+    public static class ChildOnEnterHandler {
+        private volatile    Boolean handleOnEnterByChildren;
+        private             Long    tickSecondsElapsed;
+
+        public void setTickSecondsElapsed(Long tickSecondsElapsed) {
+            this.tickSecondsElapsed = tickSecondsElapsed;
+        }
+
+        public void setHandleOnEnterByChildren(Boolean handleOnEnterByChildren) {
+            this.handleOnEnterByChildren = handleOnEnterByChildren;
+        }
+
+        public Boolean handleOnEnterByChildren() {
+            return handleOnEnterByChildren;
+        }
+
+        public Long getTickSecondsElapsed() {
+            return tickSecondsElapsed;
+        }
+
+        public boolean canHandlingOnEnterByChildren() {
+            return handleOnEnterByChildren == null;
+        }
+
+        public boolean notCallOnEnterByChildren(long tickSecondsElapsed) {
+            return handleOnEnterByChildren
+                && this.tickSecondsElapsed != null
+                && this.tickSecondsElapsed != tickSecondsElapsed;
+        }
+    }
+
+    // ===========================================================
 	// Constructors
 	// ===========================================================
 
 	public Engine(final EngineOptions pEngineOptions) {
+        childOnEnterHandler = new ChildOnEnterHandler();
 		/* Initialize Factory and Manager classes. */
 		BitmapTextureAtlasTextureRegionFactory.reset();
 		SoundFactory.onCreate();
@@ -189,6 +225,14 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		return this.mRunning;
 	}
 
+    public static synchronized ChildOnEnterHandler getChildOnEnterHandler() {
+        return childOnEnterHandler;
+    }
+
+    public static synchronized void setNullChildOnEnterHandler() {
+        childOnEnterHandler = null;
+    }
+
 	public synchronized void start() {
 		if (!this.mRunning) {
 			this.mLastTick = System.nanoTime();
@@ -204,7 +248,9 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			if (this.mSoundManager != null) {
 				this.mSoundManager.onPause();
 			}
+
 			this.mRunning = false;
+            childOnEnterHandler = null;
 		}
 	}
 
@@ -559,13 +605,26 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	void onTickUpdate() throws InterruptedException {
 		if (this.mRunning) {
-			final long secondsElapsed = this.getNanosecondsElapsed();
+            final long tickSecondsElapsed = this.getNanosecondsElapsed();
+            if (childOnEnterHandler == null) {
+                childOnEnterHandler = new ChildOnEnterHandler();
+            }
+            if (childOnEnterHandler.getTickSecondsElapsed() == null) {
+                childOnEnterHandler.setTickSecondsElapsed(tickSecondsElapsed);
+            }
 
-			this.mEngineLock.lock();
+            this.mEngineLock.lock();
 			try {
-				this.throwOnDestroyed();
 
-				this.onUpdate(secondsElapsed);
+                if (childOnEnterHandler.canHandlingOnEnterByChildren()) {
+                    childOnEnterHandler.setHandleOnEnterByChildren(Boolean.TRUE);
+                } else if (childOnEnterHandler.notCallOnEnterByChildren(tickSecondsElapsed)) {
+                    childOnEnterHandler.setHandleOnEnterByChildren(Boolean.FALSE);
+                }
+
+                this.throwOnDestroyed();
+
+				this.onUpdate(tickSecondsElapsed);
 
 				this.throwOnDestroyed();
 
@@ -573,7 +632,10 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 				this.mEngineLock.waitUntilCanUpdate();
 			} finally {
 				this.mEngineLock.unlock();
-			}
+            }
+            if (childOnEnterHandler != null) {
+                childOnEnterHandler.setTickSecondsElapsed(tickSecondsElapsed);
+            }
 		} else {
 			this.mEngineLock.lock();
 			try {
