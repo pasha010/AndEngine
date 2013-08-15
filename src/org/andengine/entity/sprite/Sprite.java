@@ -120,8 +120,9 @@ public class Sprite extends Shape {
 
     @Override
     public void resetEntityProperties() {
+        this.setFlippedHorizontal(false);
+        this.setFlippedVertical(false);
         super.resetEntityProperties();
-        this.setFlipped(false, false);
     }
 
     // ===========================================================
