@@ -3,13 +3,11 @@ package org.andengine.entity.scene.menu.item.decorator;
 import android.graphics.PointF;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.IUpdateHandler;
-import org.andengine.entity.IEntity;
-import org.andengine.entity.IEntityComparator;
-import org.andengine.entity.IEntityMatcher;
-import org.andengine.entity.IEntityParameterCallable;
+import org.andengine.entity.*;
 import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.modifier.IEntityModifier.IEntityModifierMatcher;
 import org.andengine.entity.scene.menu.item.IMenuItem;
+import org.andengine.entity.sprite.IOnEntityTouch;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.util.GLState;
@@ -980,6 +978,11 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
     @Override
     public boolean isPoolSet() {
         return this.mMenuItem.isPoolSet();
+    }
+
+    @Override
+    public void setTouchListener(IOnEntityTouch<? extends Entity> touchListener) {
+        this.mMenuItem.setTouchListener(touchListener);
     }
 
     // ===========================================================

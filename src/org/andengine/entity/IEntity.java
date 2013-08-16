@@ -10,6 +10,7 @@ import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.modifier.IEntityModifier.IEntityModifierMatcher;
 import org.andengine.entity.scene.ITouchArea;
 import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.IOnEntityTouch;
 import org.andengine.util.IDisposable;
 import org.andengine.util.adt.color.Color;
 import org.andengine.util.adt.list.SmartList;
@@ -435,7 +436,10 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 
     boolean isPoolSet();
 
-    // ===========================================================
+    public void setTouchListener(IOnEntityTouch<? extends Entity> touchListener);
+
+
+        // ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
 }
