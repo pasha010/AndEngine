@@ -61,11 +61,12 @@ public class Entity implements IEntity {
 
 	protected boolean mDisposed;
 	protected boolean mVisible = true;
-	protected boolean mCullingEnabled;
-	protected boolean mIgnoreUpdate;
-	protected boolean mChildrenVisible = true;
-	protected boolean mChildrenIgnoreUpdate;
-	protected boolean mChildrenSortPending;
+    protected boolean mEnabled = true;
+    protected boolean mCullingEnabled;
+    protected boolean mIgnoreUpdate;
+    protected boolean mChildrenVisible = true;
+    protected boolean mChildrenIgnoreUpdate;
+    protected boolean mChildrenSortPending;
 
 	protected int mTag = IEntity.TAG_DEFAULT;
 
@@ -232,6 +233,7 @@ public class Entity implements IEntity {
 	@Override
 	public void setVisible(final boolean pVisible) {
 		this.mVisible = pVisible;
+        this.setEnabled(this.mVisible);
 	}
 
 	@Override
@@ -265,6 +267,9 @@ public class Entity implements IEntity {
 
 	@Override
 	public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+        if (!this.isEnabled()) {
+            return false;
+        }
         if (pSceneTouchEvent.isActionDown()) {
             if (this.touchListener != null) {
                 return touchListener.onTouchDown(this);
@@ -1875,6 +1880,14 @@ public class Entity implements IEntity {
 
     public void registerOnEnterHandler(OnEnterHandler onEnterHandler) {
         this.onEnterHandler = onEnterHandler;
+    }
+
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    public void setEnabled(boolean mEnabled) {
+        this.mEnabled = mEnabled;
     }
 
     // ===========================================================

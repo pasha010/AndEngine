@@ -31,7 +31,6 @@ public class ButtonSprite extends TiledSprite {
 	private final int mStateCount;
 	private OnClickListener mOnClickListener;
 
-	private boolean mEnabled = true;
 	private State mState;
 
 	// ===========================================================
@@ -91,10 +90,7 @@ public class ButtonSprite extends TiledSprite {
 	// Getter & Setter
 	// ===========================================================
 
-	public boolean isEnabled() {
-		return this.mEnabled;
-	}
-
+    @Override
 	public void setEnabled(final boolean pEnabled) {
 		this.mEnabled = pEnabled;
 
