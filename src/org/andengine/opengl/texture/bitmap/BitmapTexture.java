@@ -1,24 +1,20 @@
 package org.andengine.opengl.texture.bitmap;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.andengine.opengl.texture.ITextureStateListener;
-import org.andengine.opengl.texture.PixelFormat;
-import org.andengine.opengl.texture.Texture;
-import org.andengine.opengl.texture.TextureManager;
-import org.andengine.opengl.texture.TextureOptions;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.opengl.GLES20;
+import android.opengl.GLUtils;
+import android.util.Log;
+import org.andengine.opengl.texture.*;
 import org.andengine.opengl.util.GLState;
 import org.andengine.util.StreamUtils;
 import org.andengine.util.adt.io.in.IInputStreamOpener;
 import org.andengine.util.exception.NullBitmapException;
 import org.andengine.util.math.MathUtils;
 
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.opengl.GLES20;
-import android.opengl.GLUtils;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * (c) 2011 Zynga Inc.
@@ -77,7 +73,9 @@ public class BitmapTexture extends Texture {
 		}
 
 		this.mWidth = decodeOptions.outWidth;
-		this.mHeight = decodeOptions.outHeight;
+        Log.i("@@@@@@ decode", "w = " + decodeOptions.outWidth);
+        Log.i("@@@@@@ decode", "h = " + decodeOptions.outHeight);
+        this.mHeight = decodeOptions.outHeight;
 	}
 
 	// ===========================================================

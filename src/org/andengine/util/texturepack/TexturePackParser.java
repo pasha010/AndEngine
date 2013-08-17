@@ -1,10 +1,6 @@
 package org.andengine.util.texturepack;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.microedition.khronos.opengles.GL10;
-
+import android.content.res.AssetManager;
 import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.PixelFormat;
 import org.andengine.opengl.texture.TextureManager;
@@ -25,7 +21,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import android.content.res.AssetManager;
+import javax.microedition.khronos.opengles.GL10;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * (c) 2011 Zynga Inc.
@@ -168,64 +166,69 @@ public class TexturePackParser extends DefaultHandler {
 		final TextureOptions textureOptions = this.parseTextureOptions(pAttributes);
 
 		final ITexture texture;
-		if (type.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_BITMAP)) {
-			try {
-				texture = new BitmapTexture(this.mTextureManager, new IInputStreamOpener() {
-					@Override
-					public InputStream open() throws IOException {
-						return TexturePackParser.this.onGetInputStream(file);
-					}
-				}, BitmapTextureFormat.fromPixelFormat(pixelFormat), textureOptions);
-			} catch (final IOException e) {
-				throw new TexturePackParseException(e);
-			}
-		} else if (type.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVR)) {
-			try {
-				texture = new PVRTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
-					@Override
-					protected InputStream onGetInputStream() throws IOException {
-						return TexturePackParser.this.onGetInputStream(file);
-					}
-				};
-			} catch (final IOException e) {
-				throw new TexturePackParseException(e);
-			}
-		} else if (type.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVRGZ)) {
-			try {
-				texture = new PVRGZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
-					@Override
-					protected InputStream onGetInputStream() throws IOException {
-						return TexturePackParser.this.onGetInputStream(file);
-					}
-				};
-			} catch (final IOException e) {
-				throw new TexturePackParseException(e);
-			}
-		} else if (type.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVRCCZ)) {
-			try {
-				texture = new PVRCCZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
-					@Override
-					protected InputStream onGetInputStream() throws IOException {
-						return TexturePackParser.this.onGetInputStream(file);
-					}
-				};
-			} catch (final IOException e) {
-				throw new TexturePackParseException(e);
-			}
-		} else if (type.equals(TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_ETC1)) {
-			try {
-				return new ETC1Texture(this.mTextureManager, textureOptions) {
-					@Override
-					protected InputStream getInputStream() throws IOException {
-						return TexturePackParser.this.onGetInputStream(file);
-					}
-				};
-			} catch (final IOException e) {
-				throw new TexturePackParseException(e);
-			}
-		} else {
-			throw new TexturePackParseException(new IllegalArgumentException("Unsupported pTextureFormat: '" + type + "'."));
-		}
+        switch (type) {
+            case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_BITMAP:
+                try {
+                    texture = new BitmapTexture(this.mTextureManager, new IInputStreamOpener() {
+                        @Override
+                        public InputStream open() throws IOException {
+                            return TexturePackParser.this.onGetInputStream(file);
+                        }
+                    }, BitmapTextureFormat.fromPixelFormat(pixelFormat), textureOptions);
+                } catch (final IOException e) {
+                    throw new TexturePackParseException(e);
+                }
+                break;
+            case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVR:
+                try {
+                    texture = new PVRTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
+                        @Override
+                        protected InputStream onGetInputStream() throws IOException {
+                            return TexturePackParser.this.onGetInputStream(file);
+                        }
+                    };
+                } catch (final IOException e) {
+                    throw new TexturePackParseException(e);
+                }
+                break;
+            case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVRGZ:
+                try {
+                    texture = new PVRGZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
+                        @Override
+                        protected InputStream onGetInputStream() throws IOException {
+                            return TexturePackParser.this.onGetInputStream(file);
+                        }
+                    };
+                } catch (final IOException e) {
+                    throw new TexturePackParseException(e);
+                }
+                break;
+            case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVRCCZ:
+                try {
+                    texture = new PVRCCZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
+                        @Override
+                        protected InputStream onGetInputStream() throws IOException {
+                            return TexturePackParser.this.onGetInputStream(file);
+                        }
+                    };
+                } catch (final IOException e) {
+                    throw new TexturePackParseException(e);
+                }
+                break;
+            case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_ETC1:
+                try {
+                    return new ETC1Texture(this.mTextureManager, textureOptions) {
+                        @Override
+                        protected InputStream getInputStream() throws IOException {
+                            return TexturePackParser.this.onGetInputStream(file);
+                        }
+                    };
+                } catch (final IOException e) {
+                    throw new TexturePackParseException(e);
+                }
+            default:
+                throw new TexturePackParseException(new IllegalArgumentException("Unsupported pTextureFormat: '" + type + "'."));
+        }
 
 		this.mTextureManager.addMappedTexture(file, texture);
 

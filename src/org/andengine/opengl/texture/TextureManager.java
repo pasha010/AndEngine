@@ -1,10 +1,6 @@
 package org.andengine.opengl.texture;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
+import android.content.res.AssetManager;
 import org.andengine.opengl.texture.bitmap.AssetBitmapTexture;
 import org.andengine.opengl.texture.bitmap.BitmapTexture;
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat;
@@ -12,7 +8,10 @@ import org.andengine.opengl.util.GLState;
 import org.andengine.util.adt.io.in.IInputStreamOpener;
 import org.andengine.util.debug.Debug;
 
-import android.content.res.AssetManager;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -239,7 +238,9 @@ public class TextureManager {
 		}
 	}
 
-	public synchronized void updateTextures(final GLState pGLState) {
+
+    /* nicolas method */
+	public synchronized void oldUpdateTextures(final GLState pGLState) {
 		final HashSet<ITexture> texturesManaged = this.mTexturesManaged;
 		final ArrayList<ITexture> texturesLoaded = this.mTexturesLoaded;
 		final ArrayList<ITexture> texturesToBeLoaded = this.mTexturesToBeLoaded;
@@ -258,8 +259,7 @@ public class TextureManager {
 		}
 
 		/* Then load pending Textures. */
-		final int texturesToBeLoadedCount = texturesToBeLoaded.size();
-
+        final int texturesToBeLoadedCount = texturesToBeLoaded.size();
 		if (texturesToBeLoadedCount > 0) {
 			for (int i = texturesToBeLoadedCount - 1; i >= 0; i--) {
 				final ITexture textureToBeLoaded = texturesToBeLoaded.remove(i);
@@ -269,7 +269,7 @@ public class TextureManager {
 
 						this.mTextureMemoryUsed += textureToBeLoaded.getTextureMemorySize();
 
-						/* Execute the warm-up to ensure the texture data is actually moved to the GPU. */
+						 /*Execute the warm-up to ensure the texture data is actually moved to the GPU.*/
 						this.mTextureWarmUpVertexBufferObject.warmup(pGLState, textureToBeLoaded);
 					} catch (final IOException e) {
 						Debug.e(e);
@@ -296,10 +296,56 @@ public class TextureManager {
 		}
 
 		/* Finally invoke the GC if anything has changed. */
-		if ((texturesToBeLoadedCount > 0) || (texturesToBeUnloadedCount > 0)) {
+		if ((this.mTexturesToBeLoaded.size() > 0) || (this.mTexturesToBeUnloaded.size() > 0)) {
 			System.gc();
 		}
 	}
+
+    /** FM Method */
+    public synchronized void updateTextures(final GLState pGLState) {
+        for (final ITexture textureToBeReloaded : this.mTexturesLoaded) {
+            if (textureToBeReloaded.isUpdateOnHardwareNeeded()) {
+                try {
+                    textureToBeReloaded.reloadToHardware(pGLState);
+                } catch (final IOException e) {
+                    Debug.e(e);
+                }
+            }
+        }
+
+		/* Then load pending Textures. */
+
+        for (final ITexture textureToBeLoaded : this.mTexturesToBeLoaded) {
+            if (!textureToBeLoaded.isLoadedToHardware()) {
+                try {
+                    textureToBeLoaded.loadToHardware(pGLState);
+
+                    this.mTextureMemoryUsed += textureToBeLoaded.getTextureMemorySize();
+
+						/* Execute the warm-up to ensure the texture data is actually moved to the GPU. */
+                    this.mTextureWarmUpVertexBufferObject.warmup(pGLState, textureToBeLoaded);
+                } catch (final IOException e) {
+                    Debug.e(e);
+                }
+            }
+            this.mTexturesLoaded.add(textureToBeLoaded);
+        }
+
+		/* Then unload pending Textures. */
+
+        for (final ITexture textureToBeUnloaded : this.mTexturesToBeUnloaded) {
+            if (textureToBeUnloaded.isLoadedToHardware()) {
+                textureToBeUnloaded.unloadFromHardware(pGLState);
+
+                this.mTextureMemoryUsed -= textureToBeUnloaded.getTextureMemorySize();
+            }
+        }
+
+/*		*//* Finally invoke the GC if anything has changed. *//*
+        if ((this.mTexturesToBeLoaded.size() > 0) || (this.mTexturesToBeUnloaded.size() > 0)) {
+            System.gc();
+        }*/
+    }
 
 	public synchronized ITexture getTexture(final String pID, final AssetManager pAssetManager, final String pAssetPath) throws IOException {
 		return this.getTexture(pID, pAssetManager, pAssetPath, TextureOptions.DEFAULT);
