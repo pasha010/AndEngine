@@ -1,6 +1,11 @@
 package org.andengine.util.texturepack;
 
 import org.andengine.opengl.texture.ITexture;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.BuildableBitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
+import org.andengine.opengl.texture.atlas.buildable.builder.BlackPawnTextureAtlasBuilder;
+import org.andengine.opengl.texture.atlas.buildable.builder.ITextureAtlasBuilder;
 
 /**
  * (c) 2011 Zynga Inc.
@@ -46,6 +51,13 @@ public class TexturePack {
 	// ===========================================================
 
 	public void loadTexture() {
+        if (mTexture instanceof BuildableBitmapTextureAtlas) {
+            try {
+                ((BuildableBitmapTextureAtlas) mTexture).build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 1));
+            } catch (ITextureAtlasBuilder.TextureAtlasBuilderException e) {
+                e.printStackTrace();
+            }
+        }
 		this.mTexture.load();
 	}
 

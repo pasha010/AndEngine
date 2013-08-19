@@ -5,6 +5,8 @@ import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.PixelFormat;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
+import org.andengine.opengl.texture.atlas.bitmap.BuildableBitmapTextureAtlas;
 import org.andengine.opengl.texture.bitmap.BitmapTexture;
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat;
 import org.andengine.opengl.texture.compressed.etc1.ETC1Texture;
@@ -114,15 +116,29 @@ public class TexturePackParser extends DefaultHandler {
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
 
+    /**
+     * в этом месте начинает парсится xml файл
+     */
 	@Override
 	public void startElement(final String pUri, final String pLocalName, final String pQualifiedName, final Attributes pAttributes) throws SAXException {
 		if (pLocalName.equals(TexturePackParser.TAG_TEXTURE)) {
+            /* здесь мы парсим размеры атласа, его свойства (не текстуры) */
 			this.mVersion = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_VERSION);
 			this.mTexture = this.parseTexture(pAttributes);
-			this.mTextureRegionLibrary = new TexturePackTextureRegionLibrary(10);
+			this.mTextureRegionLibrary = new TexturePackTextureRegionLibrary(64);
 
 			this.mTexturePack = new TexturePack(this.mTexture, this.mTextureRegionLibrary);
-		} else if (pLocalName.equals(TexturePackParser.TAG_TEXTUREREGION)) {
+
+            if (mTexture instanceof BuildableBitmapTextureAtlas) {
+                String assetPath = String.format("atlases/%s", SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_FILE));
+                /* подгрузим png которую сэкспортил нам TexturePacker */
+                BitmapTextureAtlasTextureRegionFactory.createFromAsset
+                        ( (BuildableBitmapTextureAtlas) mTexture
+                        , mAssetManager
+                        , assetPath);
+            }
+        } else if (pLocalName.equals(TexturePackParser.TAG_TEXTUREREGION)) {
+            /* здесь мы достаем текстуры и кладем их на атлас*/
 			final int id = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_ID);
 			final int x = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_X);
 			final int y = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_Y);
@@ -139,7 +155,8 @@ public class TexturePackParser extends DefaultHandler {
 			final int sourceWidth = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_WIDTH);
 			final int sourceHeight = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_HEIGHT);
 
-			this.mTextureRegionLibrary.put(new TexturePackTextureRegion(this.mTexture, x, y, width, height, id, source, rotated, trimmed, sourceX, sourceY, sourceWidth, sourceHeight));
+            TexturePackTextureRegion pTexturePackTextureRegion = new TexturePackTextureRegion(this.mTexture, x, y, width, height, id, source, rotated, trimmed, sourceX, sourceY, sourceWidth, sourceHeight);
+            this.mTextureRegionLibrary.put(pTexturePackTextureRegion);
 		} else {
 			throw new TexturePackParseException("Unexpected tag: '" + pLocalName + "'.");
 		}
@@ -168,64 +185,19 @@ public class TexturePackParser extends DefaultHandler {
 		final ITexture texture;
         switch (type) {
             case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_BITMAP:
-                try {
-                    texture = new BitmapTexture(this.mTextureManager, new IInputStreamOpener() {
-                        @Override
-                        public InputStream open() throws IOException {
-                            return TexturePackParser.this.onGetInputStream(file);
-                        }
-                    }, BitmapTextureFormat.fromPixelFormat(pixelFormat), textureOptions);
-                } catch (final IOException e) {
-                    throw new TexturePackParseException(e);
-                }
+                texture = createBitmapAtlas(pAttributes, file, pixelFormat, textureOptions);
                 break;
             case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVR:
-                try {
-                    texture = new PVRTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
-                        @Override
-                        protected InputStream onGetInputStream() throws IOException {
-                            return TexturePackParser.this.onGetInputStream(file);
-                        }
-                    };
-                } catch (final IOException e) {
-                    throw new TexturePackParseException(e);
-                }
+                texture = createPVRAtlas(file, pixelFormat, textureOptions);
                 break;
             case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVRGZ:
-                try {
-                    texture = new PVRGZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
-                        @Override
-                        protected InputStream onGetInputStream() throws IOException {
-                            return TexturePackParser.this.onGetInputStream(file);
-                        }
-                    };
-                } catch (final IOException e) {
-                    throw new TexturePackParseException(e);
-                }
+                texture = createPVRGZAtlas(file, pixelFormat, textureOptions);
                 break;
             case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVRCCZ:
-                try {
-                    texture = new PVRCCZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
-                        @Override
-                        protected InputStream onGetInputStream() throws IOException {
-                            return TexturePackParser.this.onGetInputStream(file);
-                        }
-                    };
-                } catch (final IOException e) {
-                    throw new TexturePackParseException(e);
-                }
+                texture = createPVRCCZAtlas(file, pixelFormat, textureOptions);
                 break;
             case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_ETC1:
-                try {
-                    return new ETC1Texture(this.mTextureManager, textureOptions) {
-                        @Override
-                        protected InputStream getInputStream() throws IOException {
-                            return TexturePackParser.this.onGetInputStream(file);
-                        }
-                    };
-                } catch (final IOException e) {
-                    throw new TexturePackParseException(e);
-                }
+                return createETCAtlas(file, textureOptions);
             default:
                 throw new TexturePackParseException(new IllegalArgumentException("Unsupported pTextureFormat: '" + type + "'."));
         }
@@ -235,7 +207,88 @@ public class TexturePackParser extends DefaultHandler {
 		return texture;
 	}
 
-	private static PixelFormat parsePixelFormat(final Attributes pAttributes) {
+    private ITexture createBitmapAtlas(Attributes pAttributes, final String file, PixelFormat pixelFormat, TextureOptions textureOptions) {
+        ITexture texture;
+        Integer width = Integer.parseInt(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_WIDTH));
+        Integer height = Integer.parseInt(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_HEIGHT));
+
+        texture = new BuildableBitmapTextureAtlas(this.mTextureManager, width, height, BitmapTextureFormat.fromPixelFormat(pixelFormat), TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+
+        if (false) {
+            try {
+                BitmapTexture rTexture = new BitmapTexture(this.mTextureManager, new IInputStreamOpener() {
+                    @Override
+                    public InputStream open() throws IOException {
+                        return TexturePackParser.this.onGetInputStream(file);
+                    }
+                }, BitmapTextureFormat.fromPixelFormat(pixelFormat), textureOptions);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return texture;
+    }
+
+    private ITexture createETCAtlas(final String file, final TextureOptions textureOptions) throws TexturePackParseException {
+        try {
+            return new ETC1Texture(this.mTextureManager, textureOptions) {
+                @Override
+                protected InputStream getInputStream() throws IOException {
+                    return TexturePackParser.this.onGetInputStream(file);
+                }
+            };
+        } catch (final IOException e) {
+            throw new TexturePackParseException(e);
+        }
+    }
+
+    private ITexture createPVRCCZAtlas(final String file, final PixelFormat pixelFormat, final TextureOptions textureOptions) throws TexturePackParseException {
+        ITexture texture;
+        try {
+            texture = new PVRCCZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
+                @Override
+                protected InputStream onGetInputStream() throws IOException {
+                    return TexturePackParser.this.onGetInputStream(file);
+                }
+            };
+        } catch (final IOException e) {
+            throw new TexturePackParseException(e);
+        }
+        return texture;
+    }
+
+    private ITexture createPVRGZAtlas(final String file, final PixelFormat pixelFormat, final TextureOptions textureOptions) throws TexturePackParseException {
+        ITexture texture;
+        try {
+            texture = new PVRGZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
+                @Override
+                protected InputStream onGetInputStream() throws IOException {
+                    return TexturePackParser.this.onGetInputStream(file);
+                }
+            };
+        } catch (final IOException e) {
+            throw new TexturePackParseException(e);
+        }
+        return texture;
+    }
+
+    private ITexture createPVRAtlas(final String file, final PixelFormat pixelFormat, final TextureOptions textureOptions) throws TexturePackParseException {
+        ITexture texture;
+        try {
+            texture = new PVRTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
+                @Override
+                protected InputStream onGetInputStream() throws IOException {
+                    return TexturePackParser.this.onGetInputStream(file);
+                }
+            };
+        } catch (final IOException e) {
+            throw new TexturePackParseException(e);
+        }
+        return texture;
+    }
+
+    private static PixelFormat parsePixelFormat(final Attributes pAttributes) {
 		return PixelFormat.valueOf(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_PIXELFORMAT));
 	}
 
