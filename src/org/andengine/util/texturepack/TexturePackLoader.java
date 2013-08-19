@@ -1,13 +1,6 @@
 package org.andengine.util.texturepack;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
+import android.content.res.AssetManager;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.util.StreamUtils;
 import org.andengine.util.texturepack.exception.TexturePackParseException;
@@ -15,7 +8,12 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import android.content.res.AssetManager;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * (c) 2011 Zynga Inc.
@@ -76,13 +74,11 @@ public class TexturePackLoader {
 			xr.parse(new InputSource(new BufferedInputStream(pInputStream)));
 
 			return texturePackParser.getTexturePack();
-		} catch (final SAXException e) {
+		} catch (final SAXException | IOException e) {
 			throw new TexturePackParseException(e);
 		} catch (final ParserConfigurationException pe) {
 			/* Doesn't happen. */
 			return null;
-		} catch (final IOException e) {
-			throw new TexturePackParseException(e);
 		} finally {
 			StreamUtils.close(pInputStream);
 		}

@@ -19,61 +19,54 @@ public class TexturePackTextureRegion extends TextureRegion {
 	// Fields
 	// ===========================================================
 
-	private final int mID;
-	private final String mSource;
-	private final boolean mTrimmed;
-	private final int mSourceX;
-	private final int mSourceY;
-	private final int mSourceWidth;
-	private final int mSourceHeight;
+    private final TexturePackTextureProperties texturePackTextureProperties;
 
-	// ===========================================================
+
+    // ===========================================================
 	// Constructors
 	// ===========================================================
 
-	public TexturePackTextureRegion(final ITexture pTexture, final int pX, final int pY, final int pWidth, final int pHeight, final int pID, final String pSource, final boolean pRotated, final boolean pTrimmed, final int pSourceX, final int pSourceY, final int pSourceWidth, final int pSourceHeight) {
+	private TexturePackTextureRegion(final ITexture pTexture, final int pX, final int pY, final int pWidth, final int pHeight, final int pID, final String pSource, final boolean pRotated, final boolean pTrimmed, final int pSourceX, final int pSourceY, final int pSourceWidth, final int pSourceHeight) {
 		super(pTexture, pX, pY, pWidth, pHeight, pRotated);
-
-		this.mID = pID;
-		this.mSource = pSource;
-		this.mTrimmed = pTrimmed;
-		this.mSourceX = pSourceX;
-		this.mSourceY = pSourceY;
-		this.mSourceWidth = pSourceWidth;
-		this.mSourceHeight = pSourceHeight;
+        texturePackTextureProperties = null;
 	}
 
-	// ===========================================================
+    protected TexturePackTextureRegion(TexturePackTextureContainer container) {
+        super(container.getAtlas(), container.getProperties().getX(), container.getProperties().getY(), container.getProperties().getWidth(), container.getProperties().getHeight(), container.getProperties().isRotated());
+        this.texturePackTextureProperties = container.getProperties();
+    }
+
+    // ===========================================================
 	// Getter & Setter
 	// ===========================================================
 
 	public int getID() {
-		return this.mID;
-	}
+        return texturePackTextureProperties.getID();
+    }
 
 	public String getSource() {
-		return this.mSource;
-	}
+        return texturePackTextureProperties.getSource();
+    }
 
 	public boolean isTrimmed() {
-		return this.mTrimmed;
-	}
+        return texturePackTextureProperties.isTrimmed();
+    }
 
 	public int getSourceX() {
-		return this.mSourceX;
-	}
+        return texturePackTextureProperties.getSourceX();
+    }
 
 	public int getSourceY() {
-		return this.mSourceY;
-	}
+        return texturePackTextureProperties.getSourceY();
+    }
 
 	public int getSourceWidth() {
-		return this.mSourceWidth;
-	}
+        return texturePackTextureProperties.getSourceWidth();
+    }
 
 	public int getSourceHeight() {
-		return this.mSourceHeight;
-	}
+        return texturePackTextureProperties.getSourceHeight();
+    }
 
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces
@@ -86,4 +79,86 @@ public class TexturePackTextureRegion extends TextureRegion {
 	// ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
+
+    static class TexturePackTextureProperties {
+        final int x;
+        final int y;
+        final int width;
+        final int height;
+        final int mID;
+        final String mSource;
+        final boolean isRotated;
+        final boolean mTrimmed;
+        final int mSourceX;
+        final int mSourceY;
+        final int mSourceWidth;
+        final int mSourceHeight;
+
+        public TexturePackTextureProperties(int x, int y, int width, int height, int mID, String mSource, boolean isRotated, boolean mTrimmed, int mSourceX, int mSourceY, int mSourceWidth, int mSourceHeight) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.mID = mID;
+            this.mSource = mSource;
+            this.isRotated = isRotated;
+            this.mTrimmed = mTrimmed;
+            this.mSourceX = mSourceX;
+            this.mSourceY = mSourceY;
+            this.mSourceWidth = mSourceWidth;
+            this.mSourceHeight = mSourceHeight;
+        }
+
+        int getX() {
+            return x;
+        }
+
+        int getY() {
+            return y;
+        }
+
+        int getWidth() {
+            return width;
+        }
+
+        int getHeight() {
+            return height;
+        }
+
+        boolean ismTrimmed() {
+            return mTrimmed;
+        }
+
+        public int getID() {
+            return this.mID;
+        }
+
+        public String getSource() {
+            return this.mSource;
+        }
+
+        public boolean isTrimmed() {
+            return this.mTrimmed;
+        }
+
+        public int getSourceX() {
+            return this.mSourceX;
+        }
+
+        public int getSourceY() {
+            return this.mSourceY;
+        }
+
+        public int getSourceWidth() {
+            return this.mSourceWidth;
+        }
+
+        public int getSourceHeight() {
+            return this.mSourceHeight;
+        }
+
+        public boolean isRotated() {
+            return isRotated;
+        }
+    }
 }

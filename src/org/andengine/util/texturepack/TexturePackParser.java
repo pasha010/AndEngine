@@ -5,8 +5,8 @@ import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.PixelFormat;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
-import org.andengine.opengl.texture.atlas.bitmap.BuildableBitmapTextureAtlas;
 import org.andengine.opengl.texture.bitmap.BitmapTexture;
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat;
 import org.andengine.opengl.texture.compressed.etc1.ETC1Texture;
@@ -15,6 +15,7 @@ import org.andengine.opengl.texture.compressed.pvr.PVRGZTexture;
 import org.andengine.opengl.texture.compressed.pvr.PVRTexture;
 import org.andengine.opengl.texture.compressed.pvr.PVRTexture.PVRTextureFormat;
 import org.andengine.opengl.texture.compressed.pvr.pixelbufferstrategy.SmartPVRTexturePixelBufferStrategy;
+import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.util.SAXUtils;
 import org.andengine.util.adt.data.constants.DataConstants;
 import org.andengine.util.adt.io.in.IInputStreamOpener;
@@ -93,8 +94,9 @@ public class TexturePackParser extends DefaultHandler {
 	private TexturePackTextureRegionLibrary mTextureRegionLibrary;
 	private ITexture mTexture;
 	private int mVersion;
+    private TextureRegion atlasTexture;
 
-	// ===========================================================
+    // ===========================================================
 	// Constructors
 	// ===========================================================
 
@@ -129,16 +131,20 @@ public class TexturePackParser extends DefaultHandler {
 
 			this.mTexturePack = new TexturePack(this.mTexture, this.mTextureRegionLibrary);
 
-            if (mTexture instanceof BuildableBitmapTextureAtlas) {
+            if (mTexture instanceof BitmapTextureAtlas) {
                 String assetPath = String.format("atlases/%s", SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_FILE));
                 /* подгрузим png которую сэкспортил нам TexturePacker */
-                BitmapTextureAtlasTextureRegionFactory.createFromAsset
-                        ( (BuildableBitmapTextureAtlas) mTexture
-                        , mAssetManager
-                        , assetPath);
+                atlasTexture = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+                                (BitmapTextureAtlas) mTexture
+                                , mAssetManager
+                                , assetPath
+                                , 0
+                                , 0);
+                mTextureManager.loadTexture(mTexture);
             }
+
         } else if (pLocalName.equals(TexturePackParser.TAG_TEXTUREREGION)) {
-            /* здесь мы достаем текстуры и кладем их на атлас*/
+            /* здесь мы достаем текстуры из атласа и кладем в мапу */
 			final int id = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_ID);
 			final int x = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_X);
 			final int y = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_Y);
@@ -155,8 +161,9 @@ public class TexturePackParser extends DefaultHandler {
 			final int sourceWidth = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_WIDTH);
 			final int sourceHeight = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_HEIGHT);
 
-            TexturePackTextureRegion pTexturePackTextureRegion = new TexturePackTextureRegion(this.mTexture, x, y, width, height, id, source, rotated, trimmed, sourceX, sourceY, sourceWidth, sourceHeight);
-            this.mTextureRegionLibrary.put(pTexturePackTextureRegion);
+            //TexturePackTextureRegion pTexturePackTextureRegion = new TexturePackTextureRegion(mTexture, x, y, width, height, id, source, rotated, trimmed, sourceX, sourceY, sourceWidth, sourceHeight);
+            TexturePackTextureContainer container = new TexturePackTextureContainer(mTexture, new TexturePackTextureRegion.TexturePackTextureProperties(x, y, width, height, id, source, rotated, trimmed, sourceX, sourceY, sourceWidth, sourceHeight));
+            this.mTextureRegionLibrary.put(container);
 		} else {
 			throw new TexturePackParseException("Unexpected tag: '" + pLocalName + "'.");
 		}
@@ -212,16 +219,21 @@ public class TexturePackParser extends DefaultHandler {
         Integer width = Integer.parseInt(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_WIDTH));
         Integer height = Integer.parseInt(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_HEIGHT));
 
-        texture = new BuildableBitmapTextureAtlas(this.mTextureManager, width, height, BitmapTextureFormat.fromPixelFormat(pixelFormat), TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+        texture = new BitmapTextureAtlas(this.mTextureManager, width, height, BitmapTextureFormat.RGBA_4444, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
         if (false) {
             try {
-                BitmapTexture rTexture = new BitmapTexture(this.mTextureManager, new IInputStreamOpener() {
+                IInputStreamOpener pInputStreamOpener = new IInputStreamOpener() {
                     @Override
                     public InputStream open() throws IOException {
                         return TexturePackParser.this.onGetInputStream(file);
                     }
-                }, BitmapTextureFormat.fromPixelFormat(pixelFormat), textureOptions);
+                };
+                BitmapTexture rTexture = new BitmapTexture(
+                          this.mTextureManager
+                        , pInputStreamOpener
+                        , BitmapTextureFormat.fromPixelFormat(pixelFormat)
+                        , textureOptions);
             } catch (IOException e) {
                 e.printStackTrace();
             }

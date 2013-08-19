@@ -18,7 +18,7 @@ public class TexturePackLibrary {
 	// ===========================================================
 
 	private final HashMap<String, TexturePack> mTexturePackMapping = new HashMap<String, TexturePack>();
-	private final HashMap<String, TexturePackTextureRegion> mTexturePackTextureRegionSourceMapping = new HashMap<String, TexturePackTextureRegion>();
+	private final HashMap<String, TexturePackTextureContainer> mTexturePackTextureRegionSourceMapping = new HashMap<String, TexturePackTextureContainer>();
 
 	// ===========================================================
 	// Constructors
@@ -42,7 +42,7 @@ public class TexturePackLibrary {
 	// ===========================================================
 
 	public TexturePackTextureRegion getTexturePackTextureRegion(final String pTexturePackTextureRegionSource) {
-		return this.mTexturePackTextureRegionSourceMapping.get(pTexturePackTextureRegionSource);
+		return this.mTexturePackTextureRegionSourceMapping.get(pTexturePackTextureRegionSource).getTextureRegion();
 	}
 
 	// ===========================================================
