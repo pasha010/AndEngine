@@ -240,7 +240,7 @@ public class TextureManager {
 
 
     /* nicolas method */
-	public synchronized void oldUpdateTextures(final GLState pGLState) {
+	public synchronized void updateTextures(final GLState pGLState) {
 		final HashSet<ITexture> texturesManaged = this.mTexturesManaged;
 		final ArrayList<ITexture> texturesLoaded = this.mTexturesLoaded;
 		final ArrayList<ITexture> texturesToBeLoaded = this.mTexturesToBeLoaded;
@@ -302,7 +302,7 @@ public class TextureManager {
 	}
 
     /** FM Method */
-    public synchronized void updateTextures(final GLState pGLState) {
+    public synchronized void newUpdateTextures(final GLState pGLState) {
         for (final ITexture textureToBeReloaded : this.mTexturesLoaded) {
             if (textureToBeReloaded.isUpdateOnHardwareNeeded()) {
                 try {
