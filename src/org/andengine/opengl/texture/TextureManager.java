@@ -341,10 +341,10 @@ public class TextureManager {
             }
         }
 
-/*		*//* Finally invoke the GC if anything has changed. *//*
+		/* Finally invoke the GC if anything has changed. */
         if ((this.mTexturesToBeLoaded.size() > 0) || (this.mTexturesToBeUnloaded.size() > 0)) {
             System.gc();
-        }*/
+        }
     }
 
 	public synchronized ITexture getTexture(final String pID, final AssetManager pAssetManager, final String pAssetPath) throws IOException {
