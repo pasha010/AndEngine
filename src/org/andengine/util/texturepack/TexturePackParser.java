@@ -188,7 +188,6 @@ public class TexturePackParser extends DefaultHandler {
                 new TexturePackTextureContainer(
                         texture
                       , new TexturePackTextureRegion.TexturePackTextureProperties(x, y, width, height, id, source, rotated, trimmed, sourceX, sourceY, sourceWidth, sourceHeight));
-
         mTexturePack.getTexturePackTextureRegionLibrary().put(container);
     }
 
@@ -238,7 +237,7 @@ public class TexturePackParser extends DefaultHandler {
         Integer width = Integer.parseInt(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_WIDTH));
         Integer height = Integer.parseInt(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_HEIGHT));
 
-        texture = new BitmapTextureAtlas(this.mTextureManager, width, height, BitmapTextureFormat.RGBA_4444, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+        texture = new BitmapTextureAtlas(this.mTextureManager, width, height, BitmapTextureFormat.fromPixelFormat(pixelFormat), TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
         if (false) {
             try {
