@@ -348,9 +348,19 @@ public class Entity implements IEntity {
 		this.mTag = pTag;
 	}
 
-	@Override
+    /**
+     * Returns zIndex of an entity.
+     * ZIndex is a sum of all parents' zIndexes
+     * and is calculated recursively.
+     * @return mZIndex
+     */
+    @Override
 	public int getZIndex() {
-		return this.mZIndex;
+        int parentZIndex = 0;
+        if (this.hasParent()) {
+            parentZIndex = this.getParent().getZIndex();
+        }
+		return this.mZIndex + parentZIndex;
 	}
 
 	@Override

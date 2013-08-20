@@ -1,10 +1,10 @@
 package org.andengine.entity.scene;
 
-import android.util.Log;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.runnable.RunnableHandler;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
+import org.andengine.entity.ZIndexSorter;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.IBackground;
 import org.andengine.entity.shape.IShape;
@@ -13,6 +13,7 @@ import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.util.GLState;
 import org.andengine.util.Constants;
 import org.andengine.util.adt.color.Color;
+import org.andengine.util.adt.list.IList;
 import org.andengine.util.adt.list.SmartList;
 
 import android.util.SparseArray;
@@ -46,7 +47,7 @@ public class Scene extends Entity {
 	private boolean mChildSceneModalUpdate;
 	private boolean mChildSceneModalTouch;
 
-	protected SmartList<ITouchArea> mTouchAreas = new SmartList<ITouchArea>(Scene.TOUCHAREAS_CAPACITY_DEFAULT);
+	protected SmartList<ITouchArea> mTouchAreas = new SmartList<>(Scene.TOUCHAREAS_CAPACITY_DEFAULT);
 
 	private final RunnableHandler mRunnableHandler = new RunnableHandler();
 
@@ -486,7 +487,7 @@ public class Scene extends Entity {
                     IEntity firstEntity = (IEntity) first;
                     IEntity secondEntity = (IEntity) second;
 
-                    return  secondEntity.getZIndex() - firstEntity.getZIndex();
+                    return secondEntity.getZIndex() - firstEntity.getZIndex();
                 }
 
                 return 0;

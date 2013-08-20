@@ -439,7 +439,7 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
     public void setTouchListener(IOnEntityTouch<? extends Entity> touchListener);
 
 
-        // ===========================================================
+    // ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
 }
