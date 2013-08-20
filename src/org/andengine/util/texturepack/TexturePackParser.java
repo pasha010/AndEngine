@@ -237,7 +237,7 @@ public class TexturePackParser extends DefaultHandler {
         Integer width = Integer.parseInt(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_WIDTH));
         Integer height = Integer.parseInt(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_HEIGHT));
 
-        texture = new BitmapTextureAtlas(this.mTextureManager, width, height, BitmapTextureFormat.fromPixelFormat(pixelFormat), TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+        texture = new BitmapTextureAtlas(this.mTextureManager, width, height, BitmapTextureFormat.fromPixelFormat(pixelFormat), TextureOptions.BILINEAR);
 
         if (false) {
             try {
