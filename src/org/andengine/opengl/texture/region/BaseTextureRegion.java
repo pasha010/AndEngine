@@ -19,6 +19,7 @@ public abstract class BaseTextureRegion implements ITextureRegion {
 	// ===========================================================
 
 	protected final ITexture mTexture;
+    private         String   textureName;
 
 	// ===========================================================
 	// Constructors
@@ -44,7 +45,15 @@ public abstract class BaseTextureRegion implements ITextureRegion {
 		return this.mTexture;
 	}
 
-	// ===========================================================
+    public String getTextureName() {
+        return textureName;
+    }
+
+    public void setTextureName(String textureName) {
+        this.textureName = textureName;
+    }
+
+    // ===========================================================
 	// Methods
 	// ===========================================================
 

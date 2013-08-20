@@ -1,6 +1,5 @@
 package org.andengine.util.texturepack;
 
-import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.region.TextureRegion;
 
 /**
@@ -26,14 +25,10 @@ public class TexturePackTextureRegion extends TextureRegion {
 	// Constructors
 	// ===========================================================
 
-	private TexturePackTextureRegion(final ITexture pTexture, final int pX, final int pY, final int pWidth, final int pHeight, final int pID, final String pSource, final boolean pRotated, final boolean pTrimmed, final int pSourceX, final int pSourceY, final int pSourceWidth, final int pSourceHeight) {
-		super(pTexture, pX, pY, pWidth, pHeight, pRotated);
-        texturePackTextureProperties = null;
-	}
-
     protected TexturePackTextureRegion(TexturePackTextureContainer container) {
         super(container.getAtlas(), container.getProperties().getX(), container.getProperties().getY(), container.getProperties().getWidth(), container.getProperties().getHeight(), container.getProperties().isRotated());
         this.texturePackTextureProperties = container.getProperties();
+        this.setTextureName(texturePackTextureProperties.getSource());
     }
 
     // ===========================================================
