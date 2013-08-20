@@ -124,52 +124,62 @@ public class TexturePackParser extends DefaultHandler {
 	@Override
 	public void startElement(final String pUri, final String pLocalName, final String pQualifiedName, final Attributes pAttributes) throws SAXException {
 		if (pLocalName.equals(TexturePackParser.TAG_TEXTURE)) {
-            /* здесь мы парсим размеры атласа, его свойства (не текстуры) */
-			this.mVersion = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_VERSION);
-			this.mTexture = this.parseTexture(pAttributes);
-			this.mTextureRegionLibrary = new TexturePackTextureRegionLibrary(64);
-
-			this.mTexturePack = new TexturePack(this.mTexture, this.mTextureRegionLibrary);
-
-            if (mTexture instanceof BitmapTextureAtlas) {
-                String assetPath = String.format("atlases/%s", SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_FILE));
-                /* подгрузим png которую сэкспортил нам TexturePacker */
-                atlasTexture = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-                                (BitmapTextureAtlas) mTexture
-                                , mAssetManager
-                                , assetPath
-                                , 0
-                                , 0);
-                mTextureManager.loadTexture(mTexture);
-            }
-
+            parseAtlas(pAttributes);
         } else if (pLocalName.equals(TexturePackParser.TAG_TEXTUREREGION)) {
-            /* здесь мы достаем текстуры из атласа и кладем в мапу */
-			final int id = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_ID);
-			final int x = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_X);
-			final int y = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_Y);
-			final int width = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_WIDTH);
-			final int height = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_HEIGHT);
-
-			final String source = SAXUtils.getAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE);
-
-			// TODO Not sure how trimming could be transparently supported...
-			final boolean trimmed = SAXUtils.getBooleanAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_TRIMMED);
-			final boolean rotated = SAXUtils.getBooleanAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_ROTATED);
-			final int sourceX = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_X);
-			final int sourceY = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_Y);
-			final int sourceWidth = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_WIDTH);
-			final int sourceHeight = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_HEIGHT);
-
-            //TexturePackTextureRegion pTexturePackTextureRegion = new TexturePackTextureRegion(mTexture, x, y, width, height, id, source, rotated, trimmed, sourceX, sourceY, sourceWidth, sourceHeight);
-            TexturePackTextureContainer container = new TexturePackTextureContainer(mTexture, new TexturePackTextureRegion.TexturePackTextureProperties(x, y, width, height, id, source, rotated, trimmed, sourceX, sourceY, sourceWidth, sourceHeight));
-            this.mTextureRegionLibrary.put(container);
-		} else {
+            parseTextureRegion(pAttributes);
+        } else {
 			throw new TexturePackParseException("Unexpected tag: '" + pLocalName + "'.");
 		}
 	}
 
-	// ===========================================================
+    /**
+     * здесь мы парсим размеры атласа, его свойства (не текстуры)
+     */
+    private void parseAtlas(Attributes pAttributes) throws TexturePackParseException {
+        this.mVersion = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_VERSION);
+        this.mTexture = this.parseTexture(pAttributes);
+        this.mTextureRegionLibrary = new TexturePackTextureRegionLibrary(64);
+
+        this.mTexturePack = new TexturePack(this.mTexture, this.mTextureRegionLibrary);
+
+        if (mTexture instanceof BitmapTextureAtlas) {
+            String assetPath = String.format("atlases/%s", SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_FILE));
+            /* подгрузим png которую сэкспортил нам TexturePacker */
+            atlasTexture = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+                    (BitmapTextureAtlas) mTexture
+                    , mAssetManager
+                    , assetPath
+                    , 0
+                    , 0);
+            mTextureManager.loadTexture(mTexture);
+        }
+    }
+
+    /**
+     * здесь мы достаем текстуры из атласа и кладем в мапу
+     */
+    private void parseTextureRegion(Attributes pAttributes) {
+        final int id = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_ID);
+        final int x = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_X);
+        final int y = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_Y);
+        final int width = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_WIDTH);
+        final int height = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_HEIGHT);
+
+        final String source = SAXUtils.getAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE);
+
+        // TODO Not sure how trimming could be transparently supported...
+        final boolean trimmed = SAXUtils.getBooleanAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_TRIMMED);
+        final boolean rotated = SAXUtils.getBooleanAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_ROTATED);
+        final int sourceX = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_X);
+        final int sourceY = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_Y);
+        final int sourceWidth = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_WIDTH);
+        final int sourceHeight = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_HEIGHT);
+
+        TexturePackTextureContainer container = new TexturePackTextureContainer(mTexture, new TexturePackTextureRegion.TexturePackTextureProperties(x, y, width, height, id, source, rotated, trimmed, sourceX, sourceY, sourceWidth, sourceHeight));
+        mTextureRegionLibrary.put(container);
+    }
+
+    // ===========================================================
 	// Methods
 	// ===========================================================
 
