@@ -215,7 +215,12 @@ public class SmartList<T> extends ArrayList<T> {
 		}
 	}
 
-	// ===========================================================
+    @Override
+    public synchronized T get(int index) {
+        return super.get(index);
+    }
+
+    // ===========================================================
 	// Methods
 	// ===========================================================
 
