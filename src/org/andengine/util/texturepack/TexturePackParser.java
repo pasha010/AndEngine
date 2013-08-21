@@ -41,8 +41,6 @@ public class TexturePackParser extends DefaultHandler {
 	private static final String TAG_TEXTURE = "texture";
 	private static final String TAG_TEXTURE_ATTRIBUTE_VERSION = "version";
 	private static final String TAG_TEXTURE_ATTRIBUTE_FILE = "file";
-//	private static final String TAG_TEXTURE_ATTRIBUTE_WIDTH = "width";
-//	private static final String TAG_TEXTURE_ATTRIBUTE_HEIGHT = "height";
 	private static final String TAG_TEXTURE_ATTRIBUTE_MINFILTER = "minfilter";
 	private static final String TAG_TEXTURE_ATTRIBUTE_MINFILTER_VALUE_NEAREST = "nearest";
 	private static final String TAG_TEXTURE_ATTRIBUTE_MINFILTER_VALUE_LINEAR = "linear";
@@ -116,7 +114,7 @@ public class TexturePackParser extends DefaultHandler {
 	// ===========================================================
 
     /**
-     * в этом месте начинает парсится xml файл
+     * в этом месте начинает парситься xml файл
      */
 	@Override
 	public void startElement(final String pUri, final String pLocalName, final String pQualifiedName, final Attributes pAttributes) throws SAXException {
