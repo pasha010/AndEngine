@@ -5,6 +5,8 @@ import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.PixelFormat;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.andengine.opengl.texture.bitmap.BitmapTexture;
 import org.andengine.opengl.texture.bitmap.BitmapTextureFormat;
 import org.andengine.opengl.texture.compressed.etc1.ETC1Texture;
@@ -39,8 +41,6 @@ public class TexturePackParser extends DefaultHandler {
 	private static final String TAG_TEXTURE = "texture";
 	private static final String TAG_TEXTURE_ATTRIBUTE_VERSION = "version";
 	private static final String TAG_TEXTURE_ATTRIBUTE_FILE = "file";
-//	private static final String TAG_TEXTURE_ATTRIBUTE_WIDTH = "width";
-//	private static final String TAG_TEXTURE_ATTRIBUTE_HEIGHT = "height";
 	private static final String TAG_TEXTURE_ATTRIBUTE_MINFILTER = "minfilter";
 	private static final String TAG_TEXTURE_ATTRIBUTE_MINFILTER_VALUE_NEAREST = "nearest";
 	private static final String TAG_TEXTURE_ATTRIBUTE_MINFILTER_VALUE_LINEAR = "linear";
@@ -88,11 +88,10 @@ public class TexturePackParser extends DefaultHandler {
 	private final TextureManager mTextureManager;
 
 	private TexturePack mTexturePack;
-	private TexturePackTextureRegionLibrary mTextureRegionLibrary;
-	private ITexture mTexture;
 	private int mVersion;
+    private String currentAtlasFileName;
 
-	// ===========================================================
+    // ===========================================================
 	// Constructors
 	// ===========================================================
 
@@ -114,38 +113,83 @@ public class TexturePackParser extends DefaultHandler {
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
 
+    /**
+     * в этом месте начинает парситься xml файл
+     */
 	@Override
 	public void startElement(final String pUri, final String pLocalName, final String pQualifiedName, final Attributes pAttributes) throws SAXException {
-		if (pLocalName.equals(TexturePackParser.TAG_TEXTURE)) {
-			this.mVersion = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_VERSION);
-			this.mTexture = this.parseTexture(pAttributes);
-			this.mTextureRegionLibrary = new TexturePackTextureRegionLibrary(10);
-
-			this.mTexturePack = new TexturePack(this.mTexture, this.mTextureRegionLibrary);
-		} else if (pLocalName.equals(TexturePackParser.TAG_TEXTUREREGION)) {
-			final int id = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_ID);
-			final int x = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_X);
-			final int y = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_Y);
-			final int width = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_WIDTH);
-			final int height = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_HEIGHT);
-
-			final String source = SAXUtils.getAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE);
-
-			// TODO Not sure how trimming could be transparently supported...
-			final boolean trimmed = SAXUtils.getBooleanAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_TRIMMED);
-			final boolean rotated = SAXUtils.getBooleanAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_ROTATED);
-			final int sourceX = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_X);
-			final int sourceY = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_Y);
-			final int sourceWidth = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_WIDTH);
-			final int sourceHeight = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_HEIGHT);
-
-			this.mTextureRegionLibrary.put(new TexturePackTextureRegion(this.mTexture, x, y, width, height, id, source, rotated, trimmed, sourceX, sourceY, sourceWidth, sourceHeight));
-		} else {
-			throw new TexturePackParseException("Unexpected tag: '" + pLocalName + "'.");
-		}
+        switch (pLocalName) {
+            case TexturePackParser.TAG_TEXTURE:
+                parseAtlas(pAttributes);
+                break;
+            case TexturePackParser.TAG_TEXTUREREGION:
+                parseTextureRegion(pAttributes);
+                break;
+            default:
+                throw new TexturePackParseException("Unexpected tag: '" + pLocalName + "'.");
+        }
 	}
 
-	// ===========================================================
+    /**
+     * здесь мы парсим размеры атласа, его свойства (не текстуры)
+     */
+    private void parseAtlas(Attributes pAttributes) throws TexturePackParseException {
+        currentAtlasFileName = SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_FILE);
+
+        this.mVersion = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_VERSION);
+
+        ITexture currentAtlas = this.parseTexture(pAttributes);
+        if (!this.mTextureManager.hasMappedTexture(currentAtlasFileName)) {
+            this.mTextureManager.addMappedTexture(currentAtlasFileName, currentAtlas);
+        }
+
+        TexturePackTextureRegionLibrary mTextureRegionLibrary = new TexturePackTextureRegionLibrary(64);
+
+        this.mTexturePack = new TexturePack(currentAtlas, mTextureRegionLibrary);
+
+        if (currentAtlas instanceof BitmapTextureAtlas) {
+            String assetPath = String.format("atlases/%s", SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_FILE));
+            /* подгрузим png которую сэкспортил нам TexturePacker */
+            BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+                    (BitmapTextureAtlas) currentAtlas
+                    , mAssetManager
+                    , assetPath
+                    , 0
+                    , 0);
+
+            mTextureManager.loadTexture(currentAtlas);
+        }
+    }
+
+    /**
+     * здесь мы достаем текстуры из атласа и кладем в мапу
+     */
+    private void parseTextureRegion(Attributes pAttributes) {
+        final int id = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_ID);
+        final int x = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_X);
+        final int y = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_Y);
+        final int width = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_WIDTH);
+        final int height = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_HEIGHT);
+
+        final String source = SAXUtils.getAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE);
+
+        // TODO Not sure how trimming could be transparently supported...
+        final boolean trimmed = SAXUtils.getBooleanAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_TRIMMED);
+        final boolean rotated = SAXUtils.getBooleanAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_ROTATED);
+        final int sourceX = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_X);
+        final int sourceY = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_Y);
+        final int sourceWidth = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_WIDTH);
+        final int sourceHeight = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE_HEIGHT);
+
+        ITexture texture = this.mTextureManager.getMappedTexture(currentAtlasFileName);
+        TexturePackTextureContainer container =
+                new TexturePackTextureContainer(
+                        texture
+                      , new TexturePackTextureRegion.TexturePackTextureProperties(x, y, width, height, id, source, rotated, trimmed, sourceX, sourceY, sourceWidth, sourceHeight));
+        mTexturePack.getTexturePackTextureRegionLibrary().put(container);
+    }
+
+    // ===========================================================
 	// Methods
 	// ===========================================================
 
@@ -154,10 +198,8 @@ public class TexturePackParser extends DefaultHandler {
 	}
 
 	private ITexture parseTexture(final Attributes pAttributes) throws TexturePackParseException {
-		final String file = SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_FILE);
-
-		if (this.mTextureManager.hasMappedTexture(file)) {
-			return this.mTextureManager.getMappedTexture(file);
+		if (this.mTextureManager.hasMappedTexture(currentAtlasFileName)) {
+			return this.mTextureManager.getMappedTexture(currentAtlasFileName);
 		}
 
 		final String type = SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE);
@@ -168,74 +210,113 @@ public class TexturePackParser extends DefaultHandler {
 		final ITexture texture;
         switch (type) {
             case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_BITMAP:
-                try {
-                    texture = new BitmapTexture(this.mTextureManager, new IInputStreamOpener() {
-                        @Override
-                        public InputStream open() throws IOException {
-                            return TexturePackParser.this.onGetInputStream(file);
-                        }
-                    }, BitmapTextureFormat.fromPixelFormat(pixelFormat), textureOptions);
-                } catch (final IOException e) {
-                    throw new TexturePackParseException(e);
-                }
+                texture = createBitmapAtlas(pAttributes, currentAtlasFileName, pixelFormat, textureOptions);
                 break;
             case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVR:
-                try {
-                    texture = new PVRTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
-                        @Override
-                        protected InputStream onGetInputStream() throws IOException {
-                            return TexturePackParser.this.onGetInputStream(file);
-                        }
-                    };
-                } catch (final IOException e) {
-                    throw new TexturePackParseException(e);
-                }
+                texture = createPVRAtlas(currentAtlasFileName, pixelFormat, textureOptions);
                 break;
             case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVRGZ:
-                try {
-                    texture = new PVRGZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
-                        @Override
-                        protected InputStream onGetInputStream() throws IOException {
-                            return TexturePackParser.this.onGetInputStream(file);
-                        }
-                    };
-                } catch (final IOException e) {
-                    throw new TexturePackParseException(e);
-                }
+                texture = createPVRGZAtlas(currentAtlasFileName, pixelFormat, textureOptions);
                 break;
             case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_PVRCCZ:
-                try {
-                    texture = new PVRCCZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
-                        @Override
-                        protected InputStream onGetInputStream() throws IOException {
-                            return TexturePackParser.this.onGetInputStream(file);
-                        }
-                    };
-                } catch (final IOException e) {
-                    throw new TexturePackParseException(e);
-                }
+                texture = createPVRCCZAtlas(currentAtlasFileName, pixelFormat, textureOptions);
                 break;
             case TexturePackParser.TAG_TEXTURE_ATTRIBUTE_TYPE_VALUE_ETC1:
-                try {
-                    return new ETC1Texture(this.mTextureManager, textureOptions) {
-                        @Override
-                        protected InputStream getInputStream() throws IOException {
-                            return TexturePackParser.this.onGetInputStream(file);
-                        }
-                    };
-                } catch (final IOException e) {
-                    throw new TexturePackParseException(e);
-                }
+                return createETCAtlas(currentAtlasFileName, textureOptions);
             default:
                 throw new TexturePackParseException(new IllegalArgumentException("Unsupported pTextureFormat: '" + type + "'."));
         }
 
-		this.mTextureManager.addMappedTexture(file, texture);
-
 		return texture;
 	}
 
-	private static PixelFormat parsePixelFormat(final Attributes pAttributes) {
+    private ITexture createBitmapAtlas(Attributes pAttributes, final String file, PixelFormat pixelFormat, TextureOptions textureOptions) {
+        ITexture texture;
+        Integer width = Integer.parseInt(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_WIDTH));
+        Integer height = Integer.parseInt(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_HEIGHT));
+
+        texture = new BitmapTextureAtlas(this.mTextureManager, width, height, BitmapTextureFormat.fromPixelFormat(pixelFormat), TextureOptions.BILINEAR);
+
+        if (false) {
+            try {
+                IInputStreamOpener pInputStreamOpener = new IInputStreamOpener() {
+                    @Override
+                    public InputStream open() throws IOException {
+                        return TexturePackParser.this.onGetInputStream(file);
+                    }
+                };
+                BitmapTexture rTexture = new BitmapTexture(
+                          this.mTextureManager
+                        , pInputStreamOpener
+                        , BitmapTextureFormat.fromPixelFormat(pixelFormat)
+                        , textureOptions);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return texture;
+    }
+
+    private ITexture createETCAtlas(final String file, final TextureOptions textureOptions) throws TexturePackParseException {
+        try {
+            return new ETC1Texture(this.mTextureManager, textureOptions) {
+                @Override
+                protected InputStream getInputStream() throws IOException {
+                    return TexturePackParser.this.onGetInputStream(file);
+                }
+            };
+        } catch (final IOException e) {
+            throw new TexturePackParseException(e);
+        }
+    }
+
+    private ITexture createPVRCCZAtlas(final String file, final PixelFormat pixelFormat, final TextureOptions textureOptions) throws TexturePackParseException {
+        ITexture texture;
+        try {
+            texture = new PVRCCZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
+                @Override
+                protected InputStream onGetInputStream() throws IOException {
+                    return TexturePackParser.this.onGetInputStream(file);
+                }
+            };
+        } catch (final IOException e) {
+            throw new TexturePackParseException(e);
+        }
+        return texture;
+    }
+
+    private ITexture createPVRGZAtlas(final String file, final PixelFormat pixelFormat, final TextureOptions textureOptions) throws TexturePackParseException {
+        ITexture texture;
+        try {
+            texture = new PVRGZTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
+                @Override
+                protected InputStream onGetInputStream() throws IOException {
+                    return TexturePackParser.this.onGetInputStream(file);
+                }
+            };
+        } catch (final IOException e) {
+            throw new TexturePackParseException(e);
+        }
+        return texture;
+    }
+
+    private ITexture createPVRAtlas(final String file, final PixelFormat pixelFormat, final TextureOptions textureOptions) throws TexturePackParseException {
+        ITexture texture;
+        try {
+            texture = new PVRTexture(this.mTextureManager, PVRTextureFormat.fromPixelFormat(pixelFormat), new SmartPVRTexturePixelBufferStrategy(DataConstants.BYTES_PER_MEGABYTE / 8), textureOptions) {
+                @Override
+                protected InputStream onGetInputStream() throws IOException {
+                    return TexturePackParser.this.onGetInputStream(file);
+                }
+            };
+        } catch (final IOException e) {
+            throw new TexturePackParseException(e);
+        }
+        return texture;
+    }
+
+    private static PixelFormat parsePixelFormat(final Attributes pAttributes) {
 		return PixelFormat.valueOf(SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_PIXELFORMAT));
 	}
 

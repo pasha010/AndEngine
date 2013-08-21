@@ -1,8 +1,6 @@
 package org.andengine.util.texturepack;
 
-import java.util.HashMap;
-
-import android.util.SparseArray;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * (c) 2011 Zynga Inc.
@@ -19,27 +17,21 @@ public class TexturePackTextureRegionLibrary {
 	// Fields
 	// ===========================================================
 
-	private final SparseArray<TexturePackTextureRegion> mIDMapping;
-	private final HashMap<String, TexturePackTextureRegion> mSourceMapping;
+	private final ConcurrentHashMap<String, TexturePackTextureContainer> mSourceMapping;
 
 	// ===========================================================
 	// Constructors
 	// ===========================================================
 
 	public TexturePackTextureRegionLibrary(final int pInitialCapacity) {
-		this.mIDMapping = new SparseArray<TexturePackTextureRegion>(pInitialCapacity);
-		this.mSourceMapping = new HashMap<String, TexturePackTextureRegion>(pInitialCapacity);
+		this.mSourceMapping = new ConcurrentHashMap<>(pInitialCapacity);
 	}
 
 	// ===========================================================
 	// Getter & Setter
 	// ===========================================================
 
-	public SparseArray<TexturePackTextureRegion> getIDMapping() {
-		return this.mIDMapping;
-	}
-
-	public HashMap<String, TexturePackTextureRegion> getSourceMapping() {
+	public ConcurrentHashMap<String, TexturePackTextureContainer> getSourceMapping() {
 		return this.mSourceMapping;
 	}
 
@@ -51,44 +43,23 @@ public class TexturePackTextureRegionLibrary {
 	// Methods
 	// ===========================================================
 
-	public void put(final TexturePackTextureRegion pTexturePackTextureRegion) {
+	public void put(final TexturePackTextureContainer pTexturePackTextureRegion) {
 		this.throwOnCollision(pTexturePackTextureRegion);
 
-		this.mIDMapping.put(pTexturePackTextureRegion.getID(), pTexturePackTextureRegion);
-		this.mSourceMapping.put(pTexturePackTextureRegion.getSource(), pTexturePackTextureRegion);
-	}
-
-	public void remove(final int pID) {
-		this.mIDMapping.remove(pID);
-	}
-
-	public TexturePackTextureRegion get(final int pID) {
-		return this.mIDMapping.get(pID);
+		this.mSourceMapping.put(pTexturePackTextureRegion.getProperties().getSource(), pTexturePackTextureRegion);
 	}
 
 	public TexturePackTextureRegion get(final String pSource) {
-		return this.mSourceMapping.get(pSource);
+        TexturePackTextureContainer container = this.mSourceMapping.get(pSource);
+        return    container == null
+                ? null
+                : container.getTextureRegion();
 	}
 
-	public TexturePackTextureRegion get(final String pSource, final boolean pStripExtension) {
-		if (pStripExtension) {
-			final int indexOfExtension = pSource.lastIndexOf('.');
-			if (indexOfExtension == -1) {
-				return this.get(pSource);
-			} else {
-				final String stripped = pSource.substring(0, indexOfExtension);
-				return this.mSourceMapping.get(stripped);
-			}
-		} else {
-			return this.get(pSource);
-		}
-	}
-
-	private void throwOnCollision(final TexturePackTextureRegion pTexturePackTextureRegion) throws IllegalArgumentException {
-		if (this.mIDMapping.get(pTexturePackTextureRegion.getID()) != null) {
-			throw new IllegalArgumentException("Collision with ID: '" + pTexturePackTextureRegion.getID() + "'.");
-		} else if (this.mSourceMapping.get(pTexturePackTextureRegion.getSource()) != null) {
-			throw new IllegalArgumentException("Collision with Source: '" + pTexturePackTextureRegion.getSource() + "'.");
+	private void throwOnCollision(final TexturePackTextureContainer pTexturePackTextureRegion) throws IllegalArgumentException {
+        String source = pTexturePackTextureRegion.getProperties().getSource();
+        if (this.mSourceMapping.get(source) != null) {
+			throw new IllegalArgumentException("Collision with Source: '" + source + "'.");
 		}
 	}
 

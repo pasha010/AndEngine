@@ -208,9 +208,8 @@ public class TextureRegion extends BaseTextureRegion {
 	// ===========================================================
 
 	public void updateUV() {
-		final ITexture texture = this.mTexture;
-		final float textureWidth = texture.getWidth();
-		final float textureHeight = texture.getHeight();
+		final float textureWidth = this.mTexture.getWidth();
+		final float textureHeight = this.mTexture.getHeight();
 
 		final float x = this.getTextureX();
 		final float y = this.getTextureY();
@@ -220,12 +219,6 @@ public class TextureRegion extends BaseTextureRegion {
 
 		this.mV = y / textureHeight;
 		this.mV2 = (y + this.mTextureHeight) / textureHeight;
-
-//		this.mU = (x + 0.5f) / textureWidth;
-//		this.mU2 = (x + this.mTextureWidth - 0.5f) / textureWidth;
-//
-//		this.mV = (y + 0.5f) / textureHeight;
-//		this.mV2 = (y + this.mTextureHeight - 0.5f) / textureHeight;
 	}
 
 	// ===========================================================

@@ -73,8 +73,6 @@ public class BitmapTexture extends Texture {
 		}
 
 		this.mWidth = decodeOptions.outWidth;
-        Log.i("@@@@@@ decode", "w = " + decodeOptions.outWidth);
-        Log.i("@@@@@@ decode", "h = " + decodeOptions.outHeight);
         this.mHeight = decodeOptions.outHeight;
 	}
 

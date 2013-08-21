@@ -238,8 +238,11 @@ public class TextureManager {
 		}
 	}
 
+    /**
+     * Original Nicolas' method
+     * @param pGLState
+     */
 
-    /* nicolas method */
 	public synchronized void updateTextures(final GLState pGLState) {
 		final HashSet<ITexture> texturesManaged = this.mTexturesManaged;
 		final ArrayList<ITexture> texturesLoaded = this.mTexturesLoaded;
@@ -301,7 +304,11 @@ public class TextureManager {
 		}
 	}
 
-    /** FM Method */
+    /**
+     * Flexymind's method to replace updateTextures(final GLState pGLState)
+     * @param pGLState
+     */
+
     public synchronized void newUpdateTextures(final GLState pGLState) {
         for (final ITexture textureToBeReloaded : this.mTexturesLoaded) {
             if (textureToBeReloaded.isUpdateOnHardwareNeeded()) {
@@ -322,7 +329,7 @@ public class TextureManager {
 
                     this.mTextureMemoryUsed += textureToBeLoaded.getTextureMemorySize();
 
-						/* Execute the warm-up to ensure the texture data is actually moved to the GPU. */
+				    /* Execute the warm-up to ensure the texture data is actually moved to the GPU. */
                     this.mTextureWarmUpVertexBufferObject.warmup(pGLState, textureToBeLoaded);
                 } catch (final IOException e) {
                     Debug.e(e);
