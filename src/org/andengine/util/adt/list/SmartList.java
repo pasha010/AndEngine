@@ -61,13 +61,11 @@ public class SmartList<T> extends ArrayList<T> {
 	}
 
 	public synchronized T get(final IMatcher<T> pMatcher) {
-		final int size = this.size();
-		for (int i = 0; i < size; i++) {
-			final T item = this.get(i);
-			if (pMatcher.matches(item)) {
-				return item;
-			}
-		}
+        for (T item : this) {
+            if (pMatcher.matches(item)) {
+                return item;
+            }
+        }
 		return null;
 	}
 
@@ -91,7 +89,7 @@ public class SmartList<T> extends ArrayList<T> {
 		return removed;
 	}
 
-	public T remove(final IMatcher<T> pMatcher) {
+	public synchronized T remove(final IMatcher<T> pMatcher) {
 		for (int i = 0; i < this.size(); i++) {
 			if (pMatcher.matches(this.get(i))) {
 				return this.remove(i);
@@ -145,7 +143,7 @@ public class SmartList<T> extends ArrayList<T> {
 		}
 	}
 
-	public int indexOf(final IMatcher<T> pMatcher) {
+	public synchronized int indexOf(final IMatcher<T> pMatcher) {
 		final int size = this.size();
 		for (int i = 0; i < size; i++) {
 			final T item = this.get(i);
@@ -218,6 +216,16 @@ public class SmartList<T> extends ArrayList<T> {
     @Override
     public synchronized T get(int index) {
         return super.get(index);
+    }
+
+    @Override
+    public synchronized boolean add(T object) {
+        return super.add(object);
+    }
+
+    @Override
+    public synchronized T remove(int index) {
+        return super.remove(index);
     }
 
     // ===========================================================

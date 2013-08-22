@@ -1630,7 +1630,7 @@ public class Entity implements IEntity {
 	}
 
 	private void allocateChildren() {
-		this.mChildren = new SmartList<IEntity>(Entity.CHILDREN_CAPACITY_DEFAULT);
+		this.mChildren = new SmartList<>(Entity.CHILDREN_CAPACITY_DEFAULT);
 	}
 
 	private void allocateUpdateHandlers() {
