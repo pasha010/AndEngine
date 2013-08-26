@@ -216,12 +216,6 @@ public class FontUtils {
 
     /**
      * Split the text string by words for specified wrap width. Does not respect linebreaks!
-     * @param pFont
-     * @param pText
-     * @param pResult
-     * @param pAutoWrapWidth
-     * @param <L>
-     * @return
      */
 	private static <L extends List<CharSequence>> L splitSingleLineByWords(final IFont pFont, final CharSequence pText, final L pResult, final float pAutoWrapWidth) {
 		final int textLength = pText.length();
@@ -355,12 +349,6 @@ public class FontUtils {
 
     /**
      * Split the text string by words for specified wrap width. It takes into account linebreakes and non-breaking space
-     * @param pFont
-     * @param pText
-     * @param pResult
-     * @param pAutoWrapWidth
-     * @param <L>
-     * @return
      */
     public static <L extends List<CharSequence>> L splitLinesByWords(final IFont pFont, final CharSequence pText, final L pResult, final float pAutoWrapWidth) {
         ArrayList<CharSequence> textLines = new ArrayList<CharSequence>(TextUtils.split(pText, '\n', pResult));
