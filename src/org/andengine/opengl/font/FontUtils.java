@@ -214,9 +214,24 @@ public class FontUtils {
 		return pResult;
 	}
 
-	private static <L extends List<CharSequence>> L splitLineByWords(final IFont pFont, final CharSequence pText, final L pResult, final float pAutoWrapWidth) {
+    /**
+     * Split the text string by words for specified wrap width. Does not respect linebreaks!
+     * @param pFont
+     * @param pText
+     * @param pResult
+     * @param pAutoWrapWidth
+     * @param <L>
+     * @return
+     */
+	private static <L extends List<CharSequence>> L splitSingleLineByWords(final IFont pFont, final CharSequence pText, final L pResult, final float pAutoWrapWidth) {
 		final int textLength = pText.length();
 
+        /**
+         * When you use split {@link #split(CharSequence, java.util.List)} for text string it generates list of splitted
+         * lines, and double linebreak (/n/n) converts to "".
+         * For example: "title/n/ntext" -> "title", "", "text".
+         * To take into account "" and make possible double linebreak (/n/n) this method return "" when textLength == 0;
+         */
 		if (textLength == 0) {
             pResult.add("");
             return pResult;
@@ -338,12 +353,21 @@ public class FontUtils {
 		return pResult;
 	}
 
+    /**
+     * Split the text string by words for specified wrap width. It takes into account linebreakes and non-breaking space
+     * @param pFont
+     * @param pText
+     * @param pResult
+     * @param pAutoWrapWidth
+     * @param <L>
+     * @return
+     */
     public static <L extends List<CharSequence>> L splitLinesByWords(final IFont pFont, final CharSequence pText, final L pResult, final float pAutoWrapWidth) {
         ArrayList<CharSequence> textLines = new ArrayList<CharSequence>(TextUtils.split(pText, '\n', pResult));
         pResult.clear();
         for (CharSequence charSequence : textLines) {
             List<CharSequence> splittedLines = new LinkedList<CharSequence>();
-            splittedLines = splitLineByWords(pFont, charSequence, splittedLines, pAutoWrapWidth);
+            splittedLines = splitSingleLineByWords(pFont, charSequence, splittedLines, pAutoWrapWidth);
             pResult.addAll(splittedLines);
         }
         return pResult;
