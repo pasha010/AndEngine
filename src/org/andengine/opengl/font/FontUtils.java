@@ -1,5 +1,7 @@
 package org.andengine.opengl.font;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.andengine.entity.text.AutoWrap;
@@ -117,7 +119,7 @@ public class FontUtils {
 	 *
 	 * @param pFont
 	 * @param pText
-	 * @param pMeasureDirection If {@link MeasureDirection#FORWARDS}, starts with the first character in the {@link CharSequence}. If {@link MeasureDirection#BACKWARDS} starts with the last character in the {@link CharSequence}.
+	 * @param pMeasureDirection If {@link org.andengine.opengl.font.FontUtils.MeasureDirection#FORWARDS}, starts with the first character in the {@link CharSequence}. If {@link org.andengine.opengl.font.FontUtils.MeasureDirection#BACKWARDS} starts with the last character in the {@link CharSequence}.
 	 * @param pWidthMaximum
 	 * @param pMeasuredWidth (optional) If not <code>null</code>, returns the actual width measured. Must be an Array of size <code>1</code> or bigger.
 	 * @return the number of chars that were measured.
@@ -130,18 +132,18 @@ public class FontUtils {
 		return TextUtils.split(pText, '\n', pResult);
 	}
 
-	/**
-	 * Does not respect linebreaks!
-	 *
-	 * @param pFont
-	 * @param pText
-	 * @param pResult
-	 * @param pAutoWrapWidth
-	 * @return
-	 */
-	public static <L extends List<CharSequence>> L splitLines(final IFont pFont, final CharSequence pText, final L pResult, final AutoWrap pAutoWrap, final float pAutoWrapWidth) {
+    /**
+     * Does not respect linebreaks!
+     * @param pFont
+     * @param pText
+     * @param pResult
+     * @param pAutoWrapWidth
+     * @return
+     */
+
+    public static <L extends List<CharSequence>> L splitLines(final IFont pFont, final CharSequence pText, final L pResult, final AutoWrap pAutoWrap, final float pAutoWrapWidth) {
 		/**
-		 * TODO In order to respect already existing linebreaks, {@link #split(CharSequence, List)} could be leveraged and than the following methods could be called for each line.
+		 * TODO In order to respect already existing linebreaks, {@link #split(CharSequence, java.util.List)} could be leveraged and than the following methods could be called for each line.
 		 */
 		switch (pAutoWrap) {
 			case LETTERS:
@@ -212,11 +214,21 @@ public class FontUtils {
 		return pResult;
 	}
 
-	private static <L extends List<CharSequence>> L splitLinesByWords(final IFont pFont, final CharSequence pText, final L pResult, final float pAutoWrapWidth) {
+    /**
+     * Split the text string by words for specified wrap width. Does not respect linebreaks!
+     */
+	private static <L extends List<CharSequence>> L splitSingleLineByWords(final IFont pFont, final CharSequence pText, final L pResult, final float pAutoWrapWidth) {
 		final int textLength = pText.length();
 
+        /**
+         * When you use split {@link #split(CharSequence, java.util.List)} for text string it generates list of splitted
+         * lines, and double linebreak (/n/n) converts to "".
+         * For example: "title/n/ntext" -> "title", "", "text".
+         * To take into account "" and make possible double linebreak (/n/n) this method return "" when textLength == 0;
+         */
 		if (textLength == 0) {
-			return pResult;
+            pResult.add("");
+            return pResult;
 		}
 
 		final float spaceWidth = pFont.getLetter(' ').mAdvance;
@@ -335,7 +347,21 @@ public class FontUtils {
 		return pResult;
 	}
 
-	private static <L extends List<CharSequence>> L splitLinesByCJK(final IFont pFont, final CharSequence pText, final L pResult, final float pAutoWrapWidth) {
+    /**
+     * Split the text string by words for specified wrap width. It takes into account linebreakes and non-breaking space
+     */
+    public static <L extends List<CharSequence>> L splitLinesByWords(final IFont pFont, final CharSequence pText, final L pResult, final float pAutoWrapWidth) {
+        ArrayList<CharSequence> textLines = new ArrayList<CharSequence>(TextUtils.split(pText, '\n', pResult));
+        pResult.clear();
+        for (CharSequence charSequence : textLines) {
+            List<CharSequence> splittedLines = new LinkedList<CharSequence>();
+            splittedLines = splitSingleLineByWords(pFont, charSequence, splittedLines, pAutoWrapWidth);
+            pResult.addAll(splittedLines);
+        }
+        return pResult;
+    }
+
+    private static <L extends List<CharSequence>> L splitLinesByCJK(final IFont pFont, final CharSequence pText, final L pResult, final float pAutoWrapWidth) {
 		final int textLength = pText.length();
 
 		int lineStart = 0;
