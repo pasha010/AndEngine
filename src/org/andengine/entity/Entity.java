@@ -1712,43 +1712,45 @@ public class Entity implements IEntity {
 		{
 			this.onApplyTransformations(pGLState);
 
-			final SmartList<IEntity> children = this.mChildren;
-			if ((children == null) || !this.mChildrenVisible) {
+			synchronized (mChildren) {
+                if ((mChildren == null) || !this.mChildrenVisible) {
 				/* Draw only self. */
-				this.preDraw(pGLState, pCamera);
-				this.draw(pGLState, pCamera);
-				this.postDraw(pGLState, pCamera);
-			} else {
-				if (this.mChildrenSortPending) {
-					ZIndexSorter.getInstance().sort(this.mChildren);
-					this.mChildrenSortPending = false;
-				}
+                    this.preDraw(pGLState, pCamera);
+                    this.draw(pGLState, pCamera);
+                    this.postDraw(pGLState, pCamera);
+                } else {
+                    if (this.mChildrenSortPending) {
+                        ZIndexSorter.getInstance().sort(this.mChildren);
+                        this.mChildrenSortPending = false;
+                    }
 
-				final int childCount = children.size();
-				int i = 0;
+                    final int childCount = mChildren.size();
+                    int i = 0;
 
-				{ /* Draw children behind this Entity. */
-					for (; i < childCount; i++) {
-						final IEntity child = children.get(i);
-						if (child.getZIndex() < 0) {
-							child.onDraw(pGLState, pCamera);
-						} else {
-							break;
-						}
-					}
-				}
+                    { /* Draw children behind this Entity. */
+                        for (; i < childCount; i++) {
+                            final IEntity child = mChildren.get(i);
+                            if (child.getZIndex() < 0) {
+                                child.onDraw(pGLState, pCamera);
+                            } else {
+                                break;
+                            }
+                        }
+                    }
 
 				/* Draw self. */
-				this.preDraw(pGLState, pCamera);
-				this.draw(pGLState, pCamera);
-				this.postDraw(pGLState, pCamera);
+                    this.preDraw(pGLState, pCamera);
+                    this.draw(pGLState, pCamera);
+                    this.postDraw(pGLState, pCamera);
 
-				{ /* Draw children in front of this Entity. */
-					for (; i < childCount; i++) {
-						children.get(i).onDraw(pGLState, pCamera);
-					}
-				}
-			}
+                    { /* Draw children in front of this Entity. */
+                        for (; i < childCount; i++) {
+                            mChildren.get(i).onDraw(pGLState, pCamera);
+                        }
+                    }
+                }
+            }
+
 		}
 		pGLState.popModelViewGLMatrix();
 	}
