@@ -132,6 +132,7 @@ public class Entity implements IEntity {
     private String mName;
 
     private OnEnterHandler onEnterHandler;
+    private Boolean swallowTouch;
 
     /**
      * for recycling pool of sprites
@@ -160,6 +161,8 @@ public class Entity implements IEntity {
 		this.mHeight = pHeight;
 
         this.mName  = DEFAULT_NAME;
+
+        this.swallowTouch = null;
 
 		this.updateLocalCenters();
 
@@ -267,7 +270,7 @@ public class Entity implements IEntity {
 
 	@Override
 	public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-        if (!this.isEnabled()) {
+        if (!this.isEnabled() || ((swallowTouch != null) && swallowTouch)) {
             return false;
         }
         if (pSceneTouchEvent.isActionDown()) {
@@ -280,6 +283,7 @@ public class Entity implements IEntity {
             }
         }
         return touchListener != null;
+
 	}
 
 	@Override
@@ -1898,6 +1902,14 @@ public class Entity implements IEntity {
 
     public void setEnabled(boolean mEnabled) {
         this.mEnabled = mEnabled;
+    }
+
+    public Boolean isSwallowTouch() {
+        return swallowTouch;
+    }
+
+    public void setSwallowTouch(Boolean swallowTouch) {
+        this.swallowTouch = swallowTouch;
     }
 
     // ===========================================================
