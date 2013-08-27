@@ -50,6 +50,7 @@ public class TexturePack {
 	}
 
 	public void unloadTexture() {
+        this.mTexturePackTextureRegionLibrary.unload();
 		this.mTexture.unload();
 	}
 

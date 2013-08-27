@@ -20,6 +20,10 @@ class TexturePackTextureContainer {
         return properties;
     }
 
+    boolean isTextureDidnCreate() {
+        return textureRegion == null;
+    }
+
     TexturePackTextureRegion getTextureRegion() {
         if (textureRegion == null) {
             textureRegion = new TexturePackTextureRegion(this);

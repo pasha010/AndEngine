@@ -63,7 +63,12 @@ public class TexturePackTextureRegionLibrary {
 		}
 	}
 
-	// ===========================================================
+    public void unload() {
+        this.mSourceMapping.clear();
+    }
+
+
+    // ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
 }
