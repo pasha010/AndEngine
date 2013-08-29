@@ -19,8 +19,7 @@ public class SpritePool extends EntityPool<Sprite, BaseTextureRegion> {
 
     public void setTexture(BaseTextureRegion texture) {
         if (texture == null) {
-            throw new IllegalArgumentException(String.format( "trying to set non existing texture: %s"
-                                                            , texture.getTextureName()));
+            throw new IllegalArgumentException("trying to set non existing texture!!!");
         }
         this.texture = texture;
     }
