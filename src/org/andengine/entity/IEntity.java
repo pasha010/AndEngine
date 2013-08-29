@@ -395,7 +395,9 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 
 	public void detachChildren();
 
-	public void callOnChildren(final IEntityParameterCallable pEntityParameterCallable);
+    public void detachChildrenRecursive();
+
+    public void callOnChildren(final IEntityParameterCallable pEntityParameterCallable);
 	public void callOnChildren(final IEntityParameterCallable pEntityParameterCallable, final IEntityMatcher pEntityMatcher);
 
 	public void registerUpdateHandler(final IUpdateHandler pUpdateHandler);

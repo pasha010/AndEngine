@@ -790,10 +790,15 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 		return this.mMenuItem.detachChildren(pEntityMatcher);
 	}
 
-	@Override
+    @Override
 	public void detachChildren() {
 		this.mMenuItem.detachChildren();
 	}
+
+    @Override
+    public void detachChildrenRecursive() {
+        this.mMenuItem.detachChildrenRecursive();
+    }
 
 	@Override
 	public void callOnChildren(final IEntityParameterCallable pEntityParameterCallable) {

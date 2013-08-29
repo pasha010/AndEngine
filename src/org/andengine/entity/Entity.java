@@ -1027,6 +1027,14 @@ public class Entity implements IEntity {
 		this.mChildren.clear(Entity.PARAMETERCALLABLE_DETACHCHILD);
 	}
 
+    @Override
+    public void detachChildrenRecursive() {
+        for (IEntity child : getChildren()) {
+            child.detachChildrenRecursive();
+        }
+        this.detachChildren();
+    }
+
 	@Override
 	public void attachChild(final IEntity pEntity) throws IllegalStateException {
 		this.attachChild(pEntity, pEntity.getZIndex());
