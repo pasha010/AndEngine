@@ -1922,6 +1922,10 @@ public class Entity implements IEntity {
         this.swallowTouch = swallowTouch;
     }
 
+    public boolean hasOnEnterHandler() {
+        return onEnterHandler != null;
+    }
+
     // ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
