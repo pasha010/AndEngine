@@ -171,7 +171,11 @@ public class TexturePackParser extends DefaultHandler {
         final int width = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_WIDTH);
         final int height = SAXUtils.getIntAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_HEIGHT);
 
-        final String source = SAXUtils.getAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE);
+        String source = SAXUtils.getAttributeOrThrow(pAttributes, TAG_TEXTUREREGION_ATTRIBUTE_SOURCE);
+        if (source.contains("/")) {
+            int lastIndexOfDirSeparator = source.lastIndexOf("/");
+            source = source.substring(lastIndexOfDirSeparator + 1, source.length());
+        }
 
         // TODO Not sure how trimming could be transparently supported...
         final boolean trimmed = SAXUtils.getBooleanAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTUREREGION_ATTRIBUTE_TRIMMED);
