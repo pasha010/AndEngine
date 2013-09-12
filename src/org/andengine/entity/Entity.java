@@ -270,7 +270,7 @@ public class Entity implements IEntity {
 
 	@Override
 	public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-        if (!this.isEnabled() || ((swallowTouch != null) && swallowTouch)) {
+        if (!this.isEnabled() || ((swallowTouch != null) && !swallowTouch)) {
             return false;
         }
         if (pSceneTouchEvent.isActionDown()) {
