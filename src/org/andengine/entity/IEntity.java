@@ -300,6 +300,7 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 	public IEntity getChildByName(final String name);
 	public IEntity getChildByMatcher(final IEntityMatcher pEntityMatcher);
 	public IEntity getChildByIndex(final int pIndex);
+    public IEntity getChildByClass(final Class klass);
 	public IEntity getFirstChild();
 	public IEntity getLastChild();
     public SmartList<IEntity> getChildren();

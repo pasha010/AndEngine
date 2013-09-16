@@ -711,6 +711,11 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 	}
 
     @Override
+    public IEntity getChildByClass(Class klass) {
+        return null;
+    }
+
+    @Override
     public SmartList<IEntity> getChildren() {
         return this.mMenuItem.getChildren();
     }

@@ -917,6 +917,25 @@ public class Entity implements IEntity {
 		return this.mChildren.get(pEntityMatcher);
 	}
 
+    @Override
+    public IEntity getChildByClass(final Class klass) {
+        if (this.mChildren == null) {
+            return null;
+        }
+        IEntity result = null;
+        for (final IEntity child : this.mChildren) {
+            if (child.getClass().equals(klass)) {
+                return child;
+            } else {
+                result = child.getChildByClass(klass);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return result;
+    }
+
 	@Override
 	public IEntity getFirstChild() {
 		if (this.mChildren == null) {
