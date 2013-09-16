@@ -609,6 +609,16 @@ public class Entity implements IEntity {
 		this.mParentToLocalTransformationDirty = true;
 	}
 
+    public void setScaleByDimensions(float width, float height) {
+        if (this.mWidth < width || this.mHeight < height) {
+            this.setScale(Math.min(mWidth / width, mHeight / height));
+            return;
+        }
+        if (this.mWidth > width || this.mHeight > height) {
+            this.setScale(Math.min(width / mWidth, height/ mHeight));
+        }
+    }
+
 	@Override
 	public float getScaleCenterX() {
 		return this.mScaleCenterX;
