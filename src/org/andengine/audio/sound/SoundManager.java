@@ -92,6 +92,14 @@ public class SoundManager extends BaseAudioManager<Sound> implements OnLoadCompl
 		}
 	}
 
+    public void setOnLoadComplete(OnLoadCompleteListener listner) {
+        mSoundPool.setOnLoadCompleteListener(listner);
+    }
+
+    public Sound getSoundBySoundID(int soundID) {
+        return mSoundMap.get(soundID);
+    }
+
 	// ===========================================================
 	// Methods
 	// ===========================================================
