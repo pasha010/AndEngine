@@ -579,7 +579,25 @@ public class Entity implements IEntity {
 		return this.mScaleY;
 	}
 
-	@Override
+    @Override
+    public float getAbsoluteScaleX() {
+        float parentScaleX = SCALE_X_DEFAULT;
+        if (this.hasParent()) {
+            parentScaleX = this.getParent().getScaleX();
+        }
+        return this.mScaleX * parentScaleX;
+    }
+
+    @Override
+    public float getAbsoluteScaleY() {
+        float parentScaleY = SCALE_Y_DEFAULT;
+        if (this.hasParent()) {
+            parentScaleY = this.getParent().getScaleY();
+        }
+        return this.mScaleY * parentScaleY;
+    }
+
+    @Override
 	public void setScaleX(final float pScaleX) {
 		this.mScaleX = pScaleX;
 

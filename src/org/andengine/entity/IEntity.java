@@ -124,6 +124,8 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 	public boolean isScaled();
 	public float getScaleX();
 	public float getScaleY();
+    public float getAbsoluteScaleX();
+    public float getAbsoluteScaleY();
 	public void setScaleX(final float pScaleX);
 	public void setScaleY(final float pScaleY);
 	public void setScale(final float pScale);

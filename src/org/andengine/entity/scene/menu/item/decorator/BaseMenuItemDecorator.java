@@ -305,7 +305,17 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 		return this.mMenuItem.getScaleY();
 	}
 
-	@Override
+    @Override
+    public float getAbsoluteScaleX() {
+        return this.mMenuItem.getAbsoluteScaleX();
+    }
+
+    @Override
+    public float getAbsoluteScaleY() {
+        return this.mMenuItem.getAbsoluteScaleY();
+    }
+
+    @Override
 	public void setScale(final float pScale) {
 		this.mMenuItem.setScale(pScale);
 	}
@@ -712,7 +722,7 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 
     @Override
     public IEntity getChildByClass(Class klass) {
-        return null;
+        return this.mMenuItem.getChildByClass(klass);
     }
 
     @Override
