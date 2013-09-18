@@ -1960,6 +1960,10 @@ public class Entity implements IEntity {
         this.touchListener = touchListener;
     }
 
+    public IOnEntityTouch getTouchListener() {
+        return this.touchListener;
+    }
+
     public void registerOnEnterHandler(OnEnterHandler onEnterHandler) {
         this.onEnterHandler = onEnterHandler;
     }
