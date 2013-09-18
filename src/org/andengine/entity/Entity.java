@@ -273,13 +273,24 @@ public class Entity implements IEntity {
         if (!this.isEnabled() || ((swallowTouch != null) && !swallowTouch)) {
             return false;
         }
+
         if (pSceneTouchEvent.isActionDown()) {
             if (this.touchListener != null) {
                 return touchListener.onTouchDown(this);
             }
-        } else if (pSceneTouchEvent.isActionUp()) {
+        }
+
+        if (pSceneTouchEvent.isActionUp()) {
             if (this.touchListener != null) {
                 return touchListener.onTouchUp(this);
+            }
+        }
+
+        if (pSceneTouchEvent.isActionMove() || pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionCancel()) {
+            if (this.touchListener != null) {
+                if (!this.contains(pSceneTouchEvent.getX(), pSceneTouchEvent.getY())) {
+                    return touchListener.onTouchEnded(this);
+                }
             }
         }
         return touchListener != null;
