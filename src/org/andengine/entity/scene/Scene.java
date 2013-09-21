@@ -1,5 +1,6 @@
 package org.andengine.entity.scene;
 
+import android.util.Log;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.runnable.RunnableHandler;
 import org.andengine.entity.Entity;
@@ -331,18 +332,22 @@ public class Scene extends Entity {
                         case TouchEvent.ACTION_CANCEL:
 							touchAreaBindings.remove(pSceneTouchEvent.getPointerID());
 					}
+                    if (selectedEntity != null) {
+                        if (!selectedEntity.isVisible()) {
+                            selectedEntity = null;
+                        }
+                    }
                     touchAreas = this.mTouchAreas;
                     if (touchAreas != null) {
                         for (final ITouchArea touchArea : touchAreas) {
                             if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
-                                if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
-                                    if (pSceneTouchEvent.isActionUp()) {
-                                        if (selectedEntity != null && !selectedEntity.equals(touchArea)) {
-                                            selectedEntity = null;
-                                            return true;
-                                        }
+                                if (pSceneTouchEvent.isActionUp()) {
+                                    if ( selectedEntity != null
+                                      && !selectedEntity.equals(touchArea)) {
                                         selectedEntity = null;
+                                        return true;
                                     }
+                                    selectedEntity = null;
                                 }
                             }
                         }
