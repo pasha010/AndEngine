@@ -475,8 +475,10 @@ public class Scene extends Entity {
 	}
 
 	public void registerTouchArea(final ITouchArea pTouchArea) {
-		this.mTouchAreas.add(pTouchArea);
-        sortTouchAreas();
+		if (!this.mTouchAreas.contains(pTouchArea)) {
+            this.mTouchAreas.add(pTouchArea);
+            sortTouchAreas();
+        }
 	}
 
     /**
