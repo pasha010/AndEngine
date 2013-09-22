@@ -8,9 +8,9 @@ import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.runnable.RunnableHandler;
 import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.modifier.IEntityModifier.IEntityModifierMatcher;
-import org.andengine.entity.scene.ITouchArea;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.IOnEntityTouch;
+import org.andengine.input.touch.TouchEvent;
 import org.andengine.util.IDisposable;
 import org.andengine.util.adt.color.Color;
 import org.andengine.util.adt.list.SmartList;
@@ -29,7 +29,7 @@ import java.util.List;
  * @author Nicolas Gramlich
  * @since 11:20:25 - 08.03.2010
  */
-public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITouchArea {
+public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable {
 	// ===========================================================
 	// Constants
 	// ===========================================================
@@ -441,8 +441,16 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable, ITou
 
     boolean isPoolSet();
 
+    public boolean contains(final float pX, final float pY);
+
     public void setTouchListener(IOnEntityTouch<? extends Entity> touchListener);
 
+    /**
+     * This method only fires if this {@link IEntity} is registered to the {@link Scene} via {@link Scene#registerTouchArea(IEntity)}.
+     * @param pSceneTouchEvent
+     * @return <code>true</code> if the event was handled (that means {@link org.andengine.entity.scene.IOnAreaTouchListener} of the {@link Scene} will not be fired!), otherwise <code>false</code>.
+     */
+    public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY);
 
     // ===========================================================
 	// Inner and Anonymous Classes

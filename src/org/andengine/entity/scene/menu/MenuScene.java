@@ -2,6 +2,7 @@ package org.andengine.entity.scene.menu;
 
 import android.view.MotionEvent;
 import org.andengine.engine.camera.Camera;
+import org.andengine.entity.IEntity;
 import org.andengine.entity.scene.*;
 import org.andengine.entity.scene.menu.animator.IMenuSceneAnimator;
 import org.andengine.entity.scene.menu.animator.InstantMenuSceneAnimator;
@@ -132,7 +133,7 @@ public class MenuScene extends CameraScene implements IOnAreaTouchListener, IOnS
 	// ===========================================================
 
 	@Override
-	public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final ITouchArea pTouchArea, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+	public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final IEntity pTouchArea, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
 		final IMenuItem menuItem = ((IMenuItem)pTouchArea);
 
 		switch (pSceneTouchEvent.getAction()) {
