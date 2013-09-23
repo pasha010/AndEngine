@@ -605,6 +605,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	void onTickUpdate() throws InterruptedException {
 		if (this.mRunning) {
+            this.mEngineLock.lock();
+
             final long tickSecondsElapsed = this.getNanosecondsElapsed();
             if (childOnEnterHandler == null) {
                 childOnEnterHandler = new ChildOnEnterHandler();
@@ -612,8 +614,6 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
             if (childOnEnterHandler.getTickSecondsElapsed() == null) {
                 childOnEnterHandler.setTickSecondsElapsed(tickSecondsElapsed);
             }
-
-            this.mEngineLock.lock();
 			try {
 
                 if (childOnEnterHandler.canHandlingOnEnterByChildren()) {
