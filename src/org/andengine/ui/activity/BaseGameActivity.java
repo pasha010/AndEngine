@@ -1,7 +1,13 @@
 package org.andengine.ui.activity;
 
-import java.io.IOException;
-
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.media.AudioManager;
+import android.os.Bundle;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
+import android.view.Gravity;
+import android.widget.FrameLayout.LayoutParams;
 import org.andengine.BuildConfig;
 import org.andengine.audio.music.MusicManager;
 import org.andengine.audio.sound.SoundManager;
@@ -29,14 +35,7 @@ import org.andengine.util.Constants;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.system.SystemUtils;
 
-import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.media.AudioManager;
-import android.os.Bundle;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
-import android.view.Gravity;
-import android.widget.FrameLayout.LayoutParams;
+import java.io.IOException;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -296,14 +295,6 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	public void onDestroyResources() throws IOException {
 		if (BuildConfig.DEBUG) {
 			Debug.d(this.getClass().getSimpleName() + ".onDestroyResources" + " @(Thread: '" + Thread.currentThread().getName() + "')");
-		}
-
-		if (this.mEngine.getEngineOptions().getAudioOptions().needsMusic()) {
-			this.getMusicManager().releaseAll();
-		}
-
-		if (this.mEngine.getEngineOptions().getAudioOptions().needsSound()) {
-			this.getSoundManager().releaseAll();
 		}
 	}
 
