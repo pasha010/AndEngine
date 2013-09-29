@@ -99,6 +99,10 @@ public class TouchEvent {
 		return this.mPointerID;
 	}
 
+    public void setAction(int i) {
+        this.mAction = i;
+    }
+
 	public int getAction() {
 		return this.mAction;
 	}

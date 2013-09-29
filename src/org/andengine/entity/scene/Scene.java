@@ -1,11 +1,10 @@
 package org.andengine.entity.scene;
 
-import android.util.Log;
+import android.util.SparseArray;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.runnable.RunnableHandler;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
-import org.andengine.entity.ZIndexSorter;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.IBackground;
 import org.andengine.entity.shape.IShape;
@@ -14,10 +13,7 @@ import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.util.GLState;
 import org.andengine.util.Constants;
 import org.andengine.util.adt.color.Color;
-import org.andengine.util.adt.list.IList;
 import org.andengine.util.adt.list.SmartList;
-
-import android.util.SparseArray;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -318,11 +314,10 @@ public class Scene extends Entity {
 				}
 			}
 			if (this.mTouchAreaBindingOnActionDownEnabled) {
-				final SparseArray<IEntity> touchAreaBindings = this.mTouchAreaBindings;
-				final IEntity boundTouchArea = touchAreaBindings.get(pSceneTouchEvent.getPointerID());
+                final IEntity touchDownArea = this.mTouchAreaBindings.get(pSceneTouchEvent.getPointerID());
 				/* In the case a ITouchArea has been bound to this PointerID,
 				 * we'll pass this this TouchEvent to the same ITouchArea. */
-				if (boundTouchArea != null) {
+				if (touchDownArea != null) {
 					final float sceneTouchEventX = pSceneTouchEvent.getX();
 					final float sceneTouchEventY = pSceneTouchEvent.getY();
 
@@ -330,31 +325,48 @@ public class Scene extends Entity {
 					switch (action) {
 						case TouchEvent.ACTION_UP:
                         case TouchEvent.ACTION_CANCEL:
-							touchAreaBindings.remove(pSceneTouchEvent.getPointerID());
+                        case TouchEvent.ACTION_OUTSIDE:
+							this.mTouchAreaBindings.remove(pSceneTouchEvent.getPointerID());
 					}
-                    if (selectedEntity != null) {
-                        if (!selectedEntity.isVisible()) {
-                            selectedEntity = null;
-                        }
-                    }
-                    touchAreas = this.mTouchAreas;
-                    if (touchAreas != null) {
-                        for (final IEntity touchArea : touchAreas) {
-                            if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
-                                if (pSceneTouchEvent.isActionUp()) {
-                                    if ( selectedEntity != null
-                                      && !selectedEntity.equals(touchArea)) {
-                                        selectedEntity = null;
-                                        return true;
-                                    }
-                                    selectedEntity = null;
-                                }
+
+                    if (!touchDownArea.contains(sceneTouchEventX, sceneTouchEventY)) {
+                        pSceneTouchEvent.setAction(TouchEvent.ACTION_OUTSIDE);
+                        this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, touchDownArea);
+                        selectedEntity = null;
+                        return true;
+                    } else {
+                        if (selectedEntity != null) {
+                            if (!selectedEntity.hasParent() || !selectedEntity.isVisible()) {
+                                selectedEntity = null;
                             }
                         }
-                    }
-                    final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, boundTouchArea);
-                    if (handled != null && handled) {
-                        return true;
+                        if (this.mTouchAreas != null) {
+                            boolean containsTouchArea = false;
+                            for (final IEntity touchArea : this.mTouchAreas) {
+                                containsTouchArea = containsTouchArea || touchArea.contains(sceneTouchEventX, sceneTouchEventY);
+                                if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
+                                    if (pSceneTouchEvent.isActionUp() || pSceneTouchEvent.isActionMove()) {
+                                        if (selectedEntity != null && !selectedEntity.equals(touchArea)) {
+                                            pSceneTouchEvent.setAction(TouchEvent.ACTION_OUTSIDE);
+                                            this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, selectedEntity);
+                                            selectedEntity = null;
+                                            return true;
+                                        }
+                                        selectedEntity = null;
+                                    }
+                                }
+                            }
+
+                            if (!containsTouchArea) {
+                                selectedEntity = null;
+                                pSceneTouchEvent.setAction(TouchEvent.ACTION_OUTSIDE);
+                            }
+                        }
+
+                        final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, touchDownArea);
+                        if (handled != null && handled) {
+                            return true;
+                        }
                     }
 				}
 			}

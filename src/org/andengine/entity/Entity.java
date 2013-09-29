@@ -286,11 +286,9 @@ public class Entity implements IEntity {
             }
         }
 
-        if (pSceneTouchEvent.isActionMove() || pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionCancel()) {
+        if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionCancel()) {
             if (this.touchListener != null) {
-                if (!this.contains(pSceneTouchEvent.getX(), pSceneTouchEvent.getY())) {
-                    return touchListener.onTouchEnded(this);
-                }
+                return touchListener.onTouchEnded(this);
             }
         }
         return touchListener != null;
