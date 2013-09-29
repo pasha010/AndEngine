@@ -22,7 +22,7 @@ public class SoundManager extends BaseAudioManager<Sound> implements OnLoadCompl
 
 	private static final int SOUND_STATUS_OK = 0;
 
-	public static final int MAX_SIMULTANEOUS_STREAMS_DEFAULT = 5;
+	public static final int MAX_SIMULTANEOUS_STREAMS_DEFAULT = 128;
 
 	// ===========================================================
 	// Fields
