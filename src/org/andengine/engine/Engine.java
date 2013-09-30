@@ -495,28 +495,15 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 		this.convertSurfaceTouchEventToSceneTouchEvent(camera, pSurfaceTouchEvent);
 
-		if (this.onTouchHUD(camera, pSurfaceTouchEvent)) {
-			return true;
-		} else {
-			/* If HUD didn't handle it, Scene may handle it. */
-			return this.onTouchScene(scene, pSurfaceTouchEvent);
-		}
+        return this.onTouchHUD(camera, pSurfaceTouchEvent) || this.onTouchScene(scene, pSurfaceTouchEvent);
 	}
 
 	protected boolean onTouchHUD(final Camera pCamera, final TouchEvent pSceneTouchEvent) {
-		if (pCamera.hasHUD()) {
-			return pCamera.getHUD().onSceneTouchEvent(pSceneTouchEvent);
-		} else {
-			return false;
-		}
+        return pCamera.hasHUD() && pCamera.getHUD().onSceneTouchEvent(pSceneTouchEvent);
 	}
 
 	protected boolean onTouchScene(final Scene pScene, final TouchEvent pSceneTouchEvent) {
-		if (pScene != null) {
-			return pScene.onSceneTouchEvent(pSceneTouchEvent);
-		} else {
-			return false;
-		}
+        return pScene != null && pScene.onSceneTouchEvent(pSceneTouchEvent);
 	}
 
 	// ===========================================================

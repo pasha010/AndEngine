@@ -26,58 +26,56 @@ import java.util.Comparator;
  * @since 12:47:39 - 08.03.2010
  */
 public class Scene extends Entity {
-	// ===========================================================
-	// Constants
-	// ===========================================================
-
-	private static final int TOUCHAREAS_CAPACITY_DEFAULT = 4;
-
-	// ===========================================================
-	// Fields
-	// ===========================================================
-
-	private float mSecondsElapsedTotal;
-
-	protected Scene mParentScene;
-	protected Scene mChildScene;
-	private boolean mChildSceneModalDraw;
-	private boolean mChildSceneModalUpdate;
-	private boolean mChildSceneModalTouch;
-
-	protected SmartList<IEntity> mTouchAreas = new SmartList<>(Scene.TOUCHAREAS_CAPACITY_DEFAULT);
-
-	private final RunnableHandler mRunnableHandler = new RunnableHandler();
-
-	private IOnSceneTouchListener mOnSceneTouchListener;
-
-	private IOnAreaTouchListener mOnAreaTouchListener;
-
-	private IBackground mBackground = new Background(Color.BLACK);
-	private boolean mBackgroundEnabled = true;
-
-	private boolean mOnAreaTouchTraversalBackToFront = true;
-
-	private boolean mTouchAreaBindingOnActionDownEnabled = false;
-	private boolean mTouchAreaBindingOnActionMoveEnabled = false;
-	private final SparseArray<IEntity> mTouchAreaBindings = new SparseArray<>();
-	private boolean mOnSceneTouchListenerBindingOnActionDownEnabled = false;
-	private final SparseArray<IOnSceneTouchListener> mOnSceneTouchListenerBindings = new SparseArray<>();
-    private IEntity selectedEntity;
-
-	// ===========================================================
-	// Constructors
-	// ===========================================================
+    private static  final   int                                 TOUCH_AREAS_CAPACITY_DEFAULT = 16;
+    private         final   RunnableHandler                     mRunnableHandler;
+    private         final   SparseArray<IEntity>                mTouchAreaBindings;
+    private         final   SparseArray<IOnSceneTouchListener>  mOnSceneTouchListenerBindings;
+    protected       final   SmartList<IEntity>                  touchAreas;
+    private                 float                               mSecondsElapsedTotal;
+    private                 boolean                             mChildSceneModalDraw;
+    private                 boolean                             mChildSceneModalUpdate;
+	private                 boolean                             mChildSceneModalTouch;
+	private                 IOnSceneTouchListener               mOnSceneTouchListener;
+	private                 IOnAreaTouchListener                mOnAreaTouchListener;
+    private                 IBackground                         mBackground;
+	private                 boolean                             mBackgroundEnabled;
+	private                 boolean                             mOnAreaTouchTraversalBackToFront;
+    private                 boolean                             mTouchAreaBindingOnActionDownEnabled;
+    private                 boolean                             mTouchAreaBindingOnActionMoveEnabled;
+    private                 boolean                             mOnSceneTouchListenerBindingOnActionDownEnabled;
+    private                 IEntity                             selectedEntity;
+    protected               Scene                               mParentScene;
+    protected               Scene                               mChildScene;
 
 	public Scene() {
-
-	}
+        touchAreas                      = new SmartList<>(TOUCH_AREAS_CAPACITY_DEFAULT);
+        mOnSceneTouchListenerBindings   = new SparseArray<>();
+        mTouchAreaBindings              = new SparseArray<>();
+        mRunnableHandler                = new RunnableHandler();
+        mBackground                     = new Background(Color.BLACK);
+        mBackgroundEnabled              = true;
+        mOnAreaTouchTraversalBackToFront = true;
+        mTouchAreaBindingOnActionDownEnabled = false;
+        mTouchAreaBindingOnActionMoveEnabled = false;
+        mOnSceneTouchListenerBindingOnActionDownEnabled = false;
+    }
 
 	@Deprecated
 	public Scene(final int pChildCount) {
 		for (int i = 0; i < pChildCount; i++) {
 			this.attachChild(new Entity());
 		}
-	}
+        touchAreas = new SmartList<>(Scene.TOUCH_AREAS_CAPACITY_DEFAULT);
+        mOnSceneTouchListenerBindings = new SparseArray<>();
+        mTouchAreaBindings = new SparseArray<>();
+        mRunnableHandler = new RunnableHandler();
+        mBackground = new Background(Color.BLACK);
+        mBackgroundEnabled = true;
+        mOnAreaTouchTraversalBackToFront = true;
+        mTouchAreaBindingOnActionDownEnabled = false;
+        mTouchAreaBindingOnActionMoveEnabled = false;
+        mOnSceneTouchListenerBindingOnActionDownEnabled = false;
+    }
 
 	// ===========================================================
 	// Getter & Setter
@@ -295,7 +293,10 @@ public class Scene extends Entity {
 		final int action = pSceneTouchEvent.getAction();
 		final boolean isActionDown = pSceneTouchEvent.isActionDown();
 		final boolean isActionMove = pSceneTouchEvent.isActionMove();
-        SmartList<IEntity> touchAreas;
+
+        if (this.touchAreas.isEmpty()) {
+            return true;
+        }
 
 		if (!isActionDown) {
 			if (this.mOnSceneTouchListenerBindingOnActionDownEnabled) {
@@ -340,9 +341,9 @@ public class Scene extends Entity {
                                 selectedEntity = null;
                             }
                         }
-                        if (this.mTouchAreas != null) {
+                        if (this.touchAreas != null) {
                             boolean containsTouchArea = false;
-                            for (final IEntity touchArea : this.mTouchAreas) {
+                            for (final IEntity touchArea : this.touchAreas) {
                                 containsTouchArea = containsTouchArea || touchArea.contains(sceneTouchEventX, sceneTouchEventY);
                                 if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
                                     if (pSceneTouchEvent.isActionUp() || pSceneTouchEvent.isActionMove()) {
@@ -384,50 +385,51 @@ public class Scene extends Entity {
         final float sceneTouchEventX = pSceneTouchEvent.getX();
 		final float sceneTouchEventY = pSceneTouchEvent.getY();
 
-		touchAreas = this.mTouchAreas;
-        if (touchAreas != null) {
-			final int touchAreaCount = touchAreas.size();
-			if (touchAreaCount > 0) {
-				if (this.mOnAreaTouchTraversalBackToFront) { /* Back to Front. */
-                    for (final IEntity touchArea : touchAreas) {
-                        if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
-                            if (this.mTouchAreaBindingOnActionDownEnabled && isActionDown) {
-                                if (selectedEntity == null) {
-                                    selectedEntity = touchArea;
+        synchronized (touchAreas) {
+            if (touchAreas != null) {
+                final int touchAreaCount = touchAreas.size();
+                if (touchAreaCount > 0) {
+                    if (this.mOnAreaTouchTraversalBackToFront) { /* Back to Front. */
+                        for (final IEntity touchArea : touchAreas) {
+                            if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
+                                if (this.mTouchAreaBindingOnActionDownEnabled && isActionDown) {
+                                    if (selectedEntity == null) {
+                                        selectedEntity = touchArea;
+                                    }
+                                }
+
+                                final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, touchArea);
+                                if (handled != null && handled) {
+                                    /* If binding of ITouchAreas is enabled and this is an ACTION_DOWN event,
+                                     * bind this ITouchArea to the PointerID. */
+                                    if ( (this.mTouchAreaBindingOnActionDownEnabled && isActionDown)
+                                      || (this.mTouchAreaBindingOnActionMoveEnabled && isActionMove)) {
+
+                                        this.mTouchAreaBindings.put(pSceneTouchEvent.getPointerID(), touchArea);
+                                    }
+                                    return true;
                                 }
                             }
-
-                            final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, touchArea);
-                            if (handled != null && handled) {
-                                /* If binding of ITouchAreas is enabled and this is an ACTION_DOWN event,
-								 * bind this ITouchArea to the PointerID. */
-                                if ( (this.mTouchAreaBindingOnActionDownEnabled && isActionDown)
-                                  || (this.mTouchAreaBindingOnActionMoveEnabled && isActionMove)) {
-
-                                    this.mTouchAreaBindings.put(pSceneTouchEvent.getPointerID(), touchArea);
+                        }
+                    } else { /* Front to back. */
+                        for (int i = touchAreaCount - 1; i >= 0; i--) {
+                            final IEntity touchArea = touchAreas.get(i);
+                            if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
+                                final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, touchArea);
+                                if (handled != null && handled) {
+                                    /* If binding of ITouchAreas is enabled and this is an ACTION_DOWN event,
+                                     * bind this ITouchArea to the PointerID. */
+                                    if ((this.mTouchAreaBindingOnActionDownEnabled && isActionDown) || (this.mTouchAreaBindingOnActionMoveEnabled && isActionMove)) {
+                                        this.mTouchAreaBindings.put(pSceneTouchEvent.getPointerID(), touchArea);
+                                    }
+                                    return true;
                                 }
-                                return true;
                             }
                         }
                     }
-				} else { /* Front to back. */
-					for (int i = touchAreaCount - 1; i >= 0; i--) {
-						final IEntity touchArea = touchAreas.get(i);
-						if (touchArea.contains(sceneTouchEventX, sceneTouchEventY)) {
-							final Boolean handled = this.onAreaTouchEvent(pSceneTouchEvent, sceneTouchEventX, sceneTouchEventY, touchArea);
-                            if (handled != null && handled) {
-								/* If binding of ITouchAreas is enabled and this is an ACTION_DOWN event,
-								 * bind this ITouchArea to the PointerID. */
-                                if ((this.mTouchAreaBindingOnActionDownEnabled && isActionDown) || (this.mTouchAreaBindingOnActionMoveEnabled && isActionMove)) {
-                                    this.mTouchAreaBindings.put(pSceneTouchEvent.getPointerID(), touchArea);
-                                }
-                                return true;
-							}
-						}
-					}
-				}
-			}
-		}
+                }
+            }
+        }
 		/* If no area was touched, the Scene itself was touched as a fallback. */
 		if (this.mOnSceneTouchListener != null) {
 			final Boolean handled = this.mOnSceneTouchListener.onSceneTouchEvent(this, pSceneTouchEvent);
@@ -478,20 +480,18 @@ public class Scene extends Entity {
 //		super.setParent(pEntity);
 	}
 
-	// ===========================================================
-	// Methods
-	// ===========================================================
-
 	public void postRunnable(final Runnable pRunnable) {
 		this.mRunnableHandler.postRunnable(pRunnable);
 	}
 
 	public void registerTouchArea(final IEntity pTouchArea) {
-		if (!this.mTouchAreas.contains(pTouchArea)) {
-            this.mTouchAreas.add(pTouchArea);
-            sortTouchAreas();
+        synchronized (touchAreas) {
+            if (!this.touchAreas.contains(pTouchArea)) {
+                this.touchAreas.add(pTouchArea);
+                sortTouchAreas();
+            }
         }
-	}
+    }
 
     /**
      * sort touch areas by z-index
@@ -499,21 +499,27 @@ public class Scene extends Entity {
      * entity with smallest z-index - last in array
      */
     private void sortTouchAreas() {
-        Collections.sort(mTouchAreas, new Comparator<IEntity>() {
-            @Override
-            public int compare(IEntity first, IEntity second) {
-                return second.getZIndex() - first.getZIndex();
-            }
-        });
+        synchronized (touchAreas) {
+            Collections.sort(touchAreas, new Comparator<IEntity>() {
+                @Override
+                public int compare(IEntity first, IEntity second) {
+                    return second.getZIndex() - first.getZIndex();
+                }
+            });
+        }
     }
 
     public boolean unregisterTouchArea(final IEntity pTouchArea) {
-		return this.mTouchAreas.remove(pTouchArea);
-	}
+        synchronized (touchAreas) {
+            return this.touchAreas.remove(pTouchArea);
+        }
+    }
 
 	public void clearTouchAreas() {
-		this.mTouchAreas.clear();
-	}
+        synchronized (this.touchAreas) {
+            this.touchAreas.clear();
+        }
+    }
 
 	public void back() {
 		this.clearChildScene();
@@ -523,8 +529,4 @@ public class Scene extends Entity {
 			this.mParentScene = null;
 		}
 	}
-
-	// ===========================================================
-	// Inner and Anonymous Classes
-	// ===========================================================
 }

@@ -228,11 +228,8 @@ public class SmartList<T> extends ArrayList<T> {
         return super.remove(index);
     }
 
-    // ===========================================================
-	// Methods
-	// ===========================================================
-
-	// ===========================================================
-	// Inner and Anonymous Classes
-	// ===========================================================
+    @Override
+    public synchronized boolean isEmpty() {
+        return super.isEmpty();
+    }
 }
