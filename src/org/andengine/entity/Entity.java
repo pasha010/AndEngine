@@ -33,10 +33,6 @@ import java.util.List;
  * @since 12:00:48 - 08.03.2010
  */
 public class Entity implements IEntity {
-	// ===========================================================
-	// Constants
-	// ===========================================================
-
     public  static final String DEFAULT_NAME = "child";
     private static final int CHILDREN_CAPACITY_DEFAULT = 4;
     private static final int ENTITYMODIFIERS_CAPACITY_DEFAULT = 4;
