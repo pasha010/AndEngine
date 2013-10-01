@@ -148,7 +148,8 @@ public class TexturePackParser extends DefaultHandler {
         this.mTexturePack = new TexturePack(currentAtlas, mTextureRegionLibrary);
 
         if (currentAtlas instanceof BitmapTextureAtlas) {
-            String assetPath = String.format("atlases/%s", SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_FILE));
+            String dir = this.mAssetBasePath.substring(mAssetBasePath.indexOf("/") + 1, mAssetBasePath.lastIndexOf("/"));
+            String assetPath = String.format("%s/%s", dir, SAXUtils.getAttributeOrThrow(pAttributes, TexturePackParser.TAG_TEXTURE_ATTRIBUTE_FILE));
             /* подгрузим png которую сэкспортил нам TexturePacker */
             BitmapTextureAtlasTextureRegionFactory.createFromAsset(
                     (BitmapTextureAtlas) currentAtlas
