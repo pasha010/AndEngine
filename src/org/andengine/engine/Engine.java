@@ -605,8 +605,6 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
                 if (childOnEnterHandler.canHandlingOnEnterByChildren()) {
                     childOnEnterHandler.setHandleOnEnterByChildren(Boolean.TRUE);
-                } else if (childOnEnterHandler.notCallOnEnterByChildren(tickSecondsElapsed)) {
-                    childOnEnterHandler.setHandleOnEnterByChildren(Boolean.FALSE);
                 }
 
                 this.throwOnDestroyed();

@@ -1822,6 +1822,7 @@ public class Entity implements IEntity {
 	protected void onManagedUpdate(final float pSecondsElapsed) {
         if (invokeOnEnter()) {
             onEnterHandler.onEnter();
+            Engine.getChildOnEnterHandler().setHandleOnEnterByChildren(Boolean.FALSE);
         }
 
         if (this.mEntityModifiers != null) {
