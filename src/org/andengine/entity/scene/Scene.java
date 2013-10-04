@@ -449,7 +449,7 @@ public class Scene extends Entity {
 		}
 	}
 
-	private Boolean onAreaTouchEvent(final TouchEvent pSceneTouchEvent, final float sceneTouchEventX, final float sceneTouchEventY, final IEntity touchArea) {
+	protected Boolean onAreaTouchEvent(final TouchEvent pSceneTouchEvent, final float sceneTouchEventX, final float sceneTouchEventY, final IEntity touchArea) {
 		final float[] touchAreaLocalCoordinates = touchArea.convertSceneCoordinatesToLocalCoordinates(sceneTouchEventX, sceneTouchEventY);
 		final float touchAreaLocalX = touchAreaLocalCoordinates[Constants.VERTEX_INDEX_X];
 		final float touchAreaLocalY = touchAreaLocalCoordinates[Constants.VERTEX_INDEX_Y];
