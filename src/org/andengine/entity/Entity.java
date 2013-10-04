@@ -1823,7 +1823,6 @@ public class Entity implements IEntity {
         if (invokeOnEnter()) {
             isOnEnterHandled = true;
             onEnterHandler.onEnter();
-            Engine.getChildOnEnterHandler().setHandleOnEnterByChildren(Boolean.FALSE);
         }
 
         if (this.mEntityModifiers != null) {
@@ -1982,6 +1981,10 @@ public class Entity implements IEntity {
 
     public boolean hasOnEnterHandler() {
         return onEnterHandler != null;
+    }
+
+    public void setOnEnterHandled(boolean onEnterHandled) {
+        isOnEnterHandled = onEnterHandled;
     }
 
     // ===========================================================
