@@ -127,8 +127,9 @@ public class Entity implements IEntity {
 	private Object mUserData;
     private String mName;
 
-    private OnEnterHandler onEnterHandler;
-    private Boolean swallowTouch;
+    private             OnEnterHandler  onEnterHandler;
+    private volatile    boolean         isOnEnterHandled;
+    private             Boolean         swallowTouch;
 
     /**
      * for recycling pool of sprites
@@ -167,7 +168,6 @@ public class Entity implements IEntity {
         resetEntityProperties();
         isRecycled = false;
         isPoolSet = false;
-
 	}
 
     /**
@@ -182,6 +182,7 @@ public class Entity implements IEntity {
             this.detachSelf();
             this.setAlpha(1f);
             this.reset();
+            this.isOnEnterHandled = false;
         }
     }
 
@@ -1773,54 +1774,54 @@ public class Entity implements IEntity {
 
 	protected void onManagedDraw(final GLState pGLState, final Camera pCamera) {
 		pGLState.pushModelViewGLMatrix();
-		{
-			this.onApplyTransformations(pGLState);
 
-			synchronized (mChildren) {
-                if ((mChildren == null) || !this.mChildrenVisible) {
-				/* Draw only self. */
-                    this.preDraw(pGLState, pCamera);
-                    this.draw(pGLState, pCamera);
-                    this.postDraw(pGLState, pCamera);
-                } else {
-                    if (this.mChildrenSortPending) {
-                        ZIndexSorter.getInstance().sort(this.mChildren);
-                        this.mChildrenSortPending = false;
-                    }
+        this.onApplyTransformations(pGLState);
 
-                    final int childCount = mChildren.size();
-                    int i = 0;
+        synchronized (mChildren) {
+            if ((mChildren == null) || !this.mChildrenVisible) {
+            /* Draw only self. */
+                this.preDraw(pGLState, pCamera);
+                this.draw(pGLState, pCamera);
+                this.postDraw(pGLState, pCamera);
+            } else {
+                if (this.mChildrenSortPending) {
+                    ZIndexSorter.getInstance().sort(this.mChildren);
+                    this.mChildrenSortPending = false;
+                }
 
-                    { /* Draw children behind this Entity. */
-                        for (; i < childCount; i++) {
-                            final IEntity child = mChildren.get(i);
-                            if (child.getZIndex() < 0) {
-                                child.onDraw(pGLState, pCamera);
-                            } else {
-                                break;
-                            }
-                        }
-                    }
+                final int childCount = mChildren.size();
+                int i = 0;
 
-				/* Draw self. */
-                    this.preDraw(pGLState, pCamera);
-                    this.draw(pGLState, pCamera);
-                    this.postDraw(pGLState, pCamera);
-
-                    { /* Draw children in front of this Entity. */
-                        for (; i < childCount; i++) {
-                            mChildren.get(i).onDraw(pGLState, pCamera);
+                { /* Draw children behind this Entity. */
+                    for (; i < childCount; i++) {
+                        final IEntity child = mChildren.get(i);
+                        if (child.getZIndex() < 0) {
+                            child.onDraw(pGLState, pCamera);
+                        } else {
+                            break;
                         }
                     }
                 }
-            }
 
-		}
+            /* Draw self. */
+                this.preDraw(pGLState, pCamera);
+                this.draw(pGLState, pCamera);
+                this.postDraw(pGLState, pCamera);
+
+                { /* Draw children in front of this Entity. */
+                    for (; i < childCount; i++) {
+                        mChildren.get(i).onDraw(pGLState, pCamera);
+                    }
+                }
+            }
+        }
+
 		pGLState.popModelViewGLMatrix();
 	}
 
 	protected void onManagedUpdate(final float pSecondsElapsed) {
         if (invokeOnEnter()) {
+            isOnEnterHandled = true;
             onEnterHandler.onEnter();
             Engine.getChildOnEnterHandler().setHandleOnEnterByChildren(Boolean.FALSE);
         }
@@ -1848,7 +1849,7 @@ public class Entity implements IEntity {
                 && Engine.getChildOnEnterHandler().handleOnEnterByChildren() != null
                 && Engine.getChildOnEnterHandler().handleOnEnterByChildren();
         boolean isOnEnterHandlerRegister = onEnterHandler != null;
-        return isEngineAllowInvoking && isOnEnterHandlerRegister;
+        return isEngineAllowInvoking && isOnEnterHandlerRegister && !isOnEnterHandled;
     }
 
 	protected void updateLocalCenters() {

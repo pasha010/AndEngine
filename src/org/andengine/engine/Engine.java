@@ -130,19 +130,15 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
      * аналог cocos2d
      */
     public static class ChildOnEnterHandler {
-        private volatile    Boolean handleOnEnterByChildren;
+        private volatile   Boolean handleOnEnterByChildren;
         private             Long    tickSecondsElapsed;
 
         public void setTickSecondsElapsed(Long tickSecondsElapsed) {
             this.tickSecondsElapsed = tickSecondsElapsed;
         }
 
-        public void setHandleOnEnterByChildren(Boolean handleOnEnterByChildren) {
-            this.handleOnEnterByChildren = handleOnEnterByChildren;
-        }
-
         public Boolean handleOnEnterByChildren() {
-            return handleOnEnterByChildren;
+            return Boolean.TRUE;
         }
 
         public Long getTickSecondsElapsed() {
@@ -602,11 +598,6 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
                 childOnEnterHandler.setTickSecondsElapsed(tickSecondsElapsed);
             }
 			try {
-
-                if (childOnEnterHandler.canHandlingOnEnterByChildren()) {
-                    childOnEnterHandler.setHandleOnEnterByChildren(Boolean.TRUE);
-                }
-
                 this.throwOnDestroyed();
 
 				this.onUpdate(tickSecondsElapsed);
