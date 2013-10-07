@@ -123,15 +123,20 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 	protected int mSurfaceWidth = 1; // 1 to prevent accidental DIV/0
 	protected int mSurfaceHeight = 1; // 1 to prevent accidental DIV/0
 
-    private static volatile ChildOnEnterHandler childOnEnterHandler;
+    private volatile ChildOnEnterHandler childOnEnterHandler;
 
     /**
      * для обработки ивентов, когда впервые показываем леер или сцену
      * аналог cocos2d
      */
     public static class ChildOnEnterHandler {
-        private volatile   Boolean handleOnEnterByChildren;
-        private             Long    tickSecondsElapsed;
+        private Long    tickSecondsElapsed;
+        private boolean invokeOnEnter;
+
+        public ChildOnEnterHandler() {
+            this.tickSecondsElapsed = 0L;
+            this.invokeOnEnter = true;
+        }
 
         public void setTickSecondsElapsed(Long tickSecondsElapsed) {
             this.tickSecondsElapsed = tickSecondsElapsed;
@@ -145,14 +150,17 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
             return tickSecondsElapsed;
         }
 
-        public boolean canHandlingOnEnterByChildren() {
-            return handleOnEnterByChildren == null;
+        public boolean notCallOnEnterByChildren(long tickSecondsElapsed) {
+            return this.tickSecondsElapsed != null
+                && this.tickSecondsElapsed != tickSecondsElapsed;
         }
 
-        public boolean notCallOnEnterByChildren(long tickSecondsElapsed) {
-            return handleOnEnterByChildren
-                && this.tickSecondsElapsed != null
-                && this.tickSecondsElapsed != tickSecondsElapsed;
+        public boolean invokeOnEnter() {
+            if (invokeOnEnter) {
+                invokeOnEnter = false;
+                return true;
+            }
+            return invokeOnEnter;
         }
     }
 
@@ -221,14 +229,6 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		return this.mRunning;
 	}
 
-    public static synchronized ChildOnEnterHandler getChildOnEnterHandler() {
-        return childOnEnterHandler;
-    }
-
-    public static synchronized void setNullChildOnEnterHandler() {
-        childOnEnterHandler = null;
-    }
-
 	public synchronized void start() {
 		if (!this.mRunning) {
 			this.mLastTick = System.nanoTime();
@@ -246,7 +246,7 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			}
 
 			this.mRunning = false;
-            setNullChildOnEnterHandler();
+            childOnEnterHandler = null;
 		}
 	}
 
@@ -607,10 +607,10 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 				this.mEngineLock.notifyCanDraw();
 				this.mEngineLock.waitUntilCanUpdate();
 			} finally {
+                if (childOnEnterHandler != null) {
+                    childOnEnterHandler.setTickSecondsElapsed(tickSecondsElapsed);
+                }
 				this.mEngineLock.unlock();
-            }
-            if (childOnEnterHandler != null) {
-                childOnEnterHandler.setTickSecondsElapsed(tickSecondsElapsed);
             }
 		} else {
 			this.mEngineLock.lock();
@@ -647,6 +647,9 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 	protected void onUpdateScene(final float pSecondsElapsed) {
 		if (this.mScene != null) {
 			this.mScene.onUpdate(pSecondsElapsed);
+            if (childOnEnterHandler.invokeOnEnter() || !this.mScene.isOnEnterHandled()) {
+                this.mScene.onEnter();
+            }
 		}
 		this.getCamera().onUpdate(pSecondsElapsed);
 	}

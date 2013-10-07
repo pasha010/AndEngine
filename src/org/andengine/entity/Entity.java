@@ -1,7 +1,6 @@
 package org.andengine.entity;
 
 import android.graphics.PointF;
-import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.UpdateHandlerList;
@@ -127,9 +126,9 @@ public class Entity implements IEntity {
 	private Object mUserData;
     private String mName;
 
-    private             OnEnterHandler  onEnterHandler;
-    private volatile    boolean         isOnEnterHandled;
-    private             Boolean         swallowTouch;
+    protected           OnEnterHandler  onEnterHandler;
+    protected           boolean         isOnEnterHandled;
+    protected           Boolean         swallowTouch;
 
     /**
      * for recycling pool of sprites
@@ -182,7 +181,7 @@ public class Entity implements IEntity {
             this.detachSelf();
             this.setAlpha(1f);
             this.reset();
-            this.isOnEnterHandled = false;
+            isOnEnterHandled = false;
         }
     }
 
@@ -225,7 +224,31 @@ public class Entity implements IEntity {
 		return this.mDisposed;
 	}
 
-	@Override
+    @Override
+    public void onEnter() {
+        if (!this.mIgnoreUpdate) {
+
+            if (hasOnEnterHandler()) {
+                this.onEnterHandler.onEnter();
+                this.isOnEnterHandled = true;
+            }
+
+            if (this.mChildren != null && !this.mChildrenIgnoreUpdate) {
+                final SmartList<IEntity> children = this.mChildren;
+                children.call(new ParameterCallable<IEntity>() {
+                    @Override
+                    public void call(IEntity child) {
+                        if (child.hasOnEnterHandler()) {
+                            child.getOnEnterHandler().onEnter();
+                            child.onEnter();
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    @Override
 	public boolean isVisible() {
 		return this.mVisible;
 	}
@@ -1377,7 +1400,7 @@ public class Entity implements IEntity {
 				final float localScaleCenterY = this.mLocalScaleCenterY;
 
 				parentToLocalTransformation.postTranslate(-localScaleCenterX, -localScaleCenterY);
-				parentToLocalTransformation.postScale(1 / scaleX, 1 / scaleY); // TODO Division could be replaced by a multiplication of 'scale(X/Y)Inverse'...
+				parentToLocalTransformation.postScale(1 / scaleX, 1 / scaleY);
 				parentToLocalTransformation.postTranslate(localScaleCenterX, localScaleCenterY);
 			}
 
@@ -1820,11 +1843,6 @@ public class Entity implements IEntity {
 	}
 
 	protected void onManagedUpdate(final float pSecondsElapsed) {
-        if (invokeOnEnter()) {
-            isOnEnterHandled = true;
-            onEnterHandler.onEnter();
-        }
-
         if (this.mEntityModifiers != null) {
 			this.mEntityModifiers.onUpdate(pSecondsElapsed);
 		}
@@ -1842,14 +1860,6 @@ public class Entity implements IEntity {
             });
 		}
 	}
-
-    private boolean invokeOnEnter() {
-        boolean isEngineAllowInvoking = Engine.getChildOnEnterHandler() != null
-                && Engine.getChildOnEnterHandler().handleOnEnterByChildren() != null
-                && Engine.getChildOnEnterHandler().handleOnEnterByChildren();
-        boolean isOnEnterHandlerRegister = onEnterHandler != null;
-        return isEngineAllowInvoking && isOnEnterHandlerRegister && !isOnEnterHandled;
-    }
 
 	protected void updateLocalCenters() {
 		this.updateLocalCenterXs();
@@ -1939,7 +1949,9 @@ public class Entity implements IEntity {
 			final String entityClassName = pEntity.getClass().getSimpleName();
 			final String currentParentClassName = pEntity.getParent().getClass().getSimpleName();
 			final String newParentClassName = this.getClass().getSimpleName();
-			throw new IllegalStateException("pEntity '" + entityClassName + "' already has a parent: '" + currentParentClassName + "'. New parent: '" + newParentClassName + "'!");
+			throw new IllegalStateException("pEntity '" + entityClassName
+                    + "' already has a parent: '" + currentParentClassName
+                    + "'. New parent: '" + newParentClassName + "'!");
 		}
 	}
 
@@ -1979,21 +1991,21 @@ public class Entity implements IEntity {
         this.swallowTouch = swallowTouch;
     }
 
+    @Override
     public boolean hasOnEnterHandler() {
         return onEnterHandler != null;
+    }
+
+    @Override
+    public OnEnterHandler getOnEnterHandler() {
+        return onEnterHandler;
     }
 
     public void setOnEnterHandled(boolean onEnterHandled) {
         isOnEnterHandled = onEnterHandled;
     }
 
-    // ===========================================================
-	// Inner and Anonymous Classes
-	// ===========================================================
-    public interface OnEnterHandler {
-        /**
-         * when entity is showed on screen we handle this event
-         */
-        public void onEnter();
+    public boolean isOnEnterHandled() {
+        return isOnEnterHandled;
     }
 }

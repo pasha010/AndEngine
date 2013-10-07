@@ -1005,6 +1005,21 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
         this.mMenuItem.setTouchListener(touchListener);
     }
 
+    @Override
+    public void onEnter() {
+        this.mMenuItem.onEnter();
+    }
+
+    @Override
+    public boolean hasOnEnterHandler() {
+        return this.mMenuItem.hasOnEnterHandler();
+    }
+
+    @Override
+    public OnEnterHandler getOnEnterHandler() {
+        return this.mMenuItem.getOnEnterHandler();
+    }
+
     // ===========================================================
 	// Methods
 	// ===========================================================

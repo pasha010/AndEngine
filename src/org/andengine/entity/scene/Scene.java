@@ -60,27 +60,6 @@ public class Scene extends Entity {
         mOnSceneTouchListenerBindingOnActionDownEnabled = false;
     }
 
-	@Deprecated
-	public Scene(final int pChildCount) {
-		for (int i = 0; i < pChildCount; i++) {
-			this.attachChild(new Entity());
-		}
-        touchAreas = new SmartList<>(Scene.TOUCH_AREAS_CAPACITY_DEFAULT);
-        mOnSceneTouchListenerBindings = new SparseArray<>();
-        mTouchAreaBindings = new SparseArray<>();
-        mRunnableHandler = new RunnableHandler();
-        mBackground = new Background(Color.BLACK);
-        mBackgroundEnabled = true;
-        mOnAreaTouchTraversalBackToFront = true;
-        mTouchAreaBindingOnActionDownEnabled = false;
-        mTouchAreaBindingOnActionMoveEnabled = false;
-        mOnSceneTouchListenerBindingOnActionDownEnabled = false;
-    }
-
-	// ===========================================================
-	// Getter & Setter
-	// ===========================================================
-
 	public float getSecondsElapsedTotal() {
 		return this.mSecondsElapsedTotal;
 	}
@@ -153,7 +132,13 @@ public class Scene extends Entity {
 		this.mChildSceneModalTouch = pModalTouch;
 	}
 
-	public void clearChildScene() {
+    @Override
+    public void attachChild(IEntity pEntity) throws IllegalStateException {
+        isOnEnterHandled = false;
+        super.attachChild(pEntity);
+    }
+
+    public void clearChildScene() {
 		this.mChildScene = null;
 	}
 
