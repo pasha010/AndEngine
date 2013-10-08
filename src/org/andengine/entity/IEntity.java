@@ -58,8 +58,6 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable {
 	// Methods
 	// ===========================================================
 
-    public void onEnter();
-
     public boolean isVisible();
 	public void setVisible(final boolean pVisible);
 
@@ -456,6 +454,7 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable {
 
     public  boolean         hasOnEnterHandler();
     public  OnEnterHandler  getOnEnterHandler();
+    public  void            resetOnEnter();
 
     public interface OnEnterHandler {
         /**

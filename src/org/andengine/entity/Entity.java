@@ -225,30 +225,6 @@ public class Entity implements IEntity {
 	}
 
     @Override
-    public void onEnter() {
-        if (!this.mIgnoreUpdate) {
-
-            if (hasOnEnterHandler()) {
-                this.onEnterHandler.onEnter();
-                this.isOnEnterHandled = true;
-            }
-
-            if (this.mChildren != null && !this.mChildrenIgnoreUpdate) {
-                final SmartList<IEntity> children = this.mChildren;
-                children.call(new ParameterCallable<IEntity>() {
-                    @Override
-                    public void call(IEntity child) {
-                        if (child.hasOnEnterHandler()) {
-                            child.getOnEnterHandler().onEnter();
-                            child.onEnter();
-                        }
-                    }
-                });
-            }
-        }
-    }
-
-    @Override
 	public boolean isVisible() {
 		return this.mVisible;
 	}
@@ -1850,7 +1826,12 @@ public class Entity implements IEntity {
 			this.mUpdateHandlers.onUpdate(pSecondsElapsed);
 		}
 
-		if ((this.mChildren != null) && !this.mChildrenIgnoreUpdate) {
+
+        if (hasOnEnterHandler() && !isOnEnterHandled) {
+            this.onEnter();
+        }
+
+		if (this.mChildren != null && !this.mChildrenIgnoreUpdate) {
 			final SmartList<IEntity> children = this.mChildren;
             children.call(new ParameterCallable<IEntity>() {
                 @Override
@@ -1860,6 +1841,23 @@ public class Entity implements IEntity {
             });
 		}
 	}
+
+    private void onEnter() {
+        this.onEnterHandler.onEnter();
+        this.isOnEnterHandled = true;
+/*
+        if (this.mChildren != null && !this.mChildrenIgnoreUpdate) {
+            final SmartList<IEntity> children = this.mChildren;
+            children.call(new ParameterCallable<IEntity>() {
+                @Override
+                public void call(IEntity child) {
+                    if (child.hasOnEnterHandler()) {
+                        child.onEnter();
+                    }
+                }
+            });
+        }*/
+    }
 
 	protected void updateLocalCenters() {
 		this.updateLocalCenterXs();
@@ -2006,6 +2004,20 @@ public class Entity implements IEntity {
     }
 
     public boolean isOnEnterHandled() {
-        return isOnEnterHandled;
+        return onEnterHandler == null || isOnEnterHandled;
+    }
+
+    @Override
+    public void resetOnEnter() {
+        this.isOnEnterHandled = false;
+        if (this.mChildren != null && !this.mChildrenIgnoreUpdate) {
+            final SmartList<IEntity> children = this.mChildren;
+            children.call(new ParameterCallable<IEntity>() {
+                @Override
+                public void call(IEntity child) {
+                    child.resetOnEnter();
+                }
+            });
+        }
     }
 }

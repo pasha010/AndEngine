@@ -646,10 +646,10 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	protected void onUpdateScene(final float pSecondsElapsed) {
 		if (this.mScene != null) {
-			this.mScene.onUpdate(pSecondsElapsed);
-            if (childOnEnterHandler.invokeOnEnter() || !this.mScene.isOnEnterHandled()) {
-                this.mScene.onEnter();
+            if (childOnEnterHandler.invokeOnEnter()) {
+                this.mScene.resetOnEnter();
             }
+            this.mScene.onUpdate(pSecondsElapsed);
 		}
 		this.getCamera().onUpdate(pSecondsElapsed);
 	}
