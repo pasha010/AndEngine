@@ -235,7 +235,7 @@ public class Entity implements IEntity {
 		this.mVisible = pVisible;
         this.setEnabled(this.mVisible);
         for (IEntity child : this.getChildren()) {
-            ((Entity) child).setEnabled(this.mVisible);
+            child.setVisible(this.mVisible);
         }
 	}
 
