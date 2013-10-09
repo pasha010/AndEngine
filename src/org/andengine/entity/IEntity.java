@@ -452,7 +452,14 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable {
      */
     public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY);
 
-    // ===========================================================
-	// Inner and Anonymous Classes
-	// ===========================================================
+    public  boolean         hasOnEnterHandler();
+    public  OnEnterHandler  getOnEnterHandler();
+    public  void            resetOnEnter();
+
+    public interface OnEnterHandler {
+        /**
+         * when entity is showed on screen we handle this event
+         */
+        public void onEnter();
+    }
 }
