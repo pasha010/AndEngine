@@ -234,6 +234,9 @@ public class Entity implements IEntity {
 	public void setVisible(final boolean pVisible) {
 		this.mVisible = pVisible;
         this.setEnabled(this.mVisible);
+        for (IEntity child : this.getChildren()) {
+            ((Entity) child).setEnabled(this.mVisible);
+        }
 	}
 
 	@Override
