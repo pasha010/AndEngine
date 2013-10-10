@@ -231,14 +231,22 @@ public class Entity implements IEntity {
 
 	@Override
 	public void setVisible(final boolean pVisible) {
-		this.mVisible = pVisible;
-        this.setEnabled(this.mVisible);
-        for (IEntity child : this.getChildren()) {
-            child.setVisible(this.mVisible);
-        }
+        this.setVisible(pVisible, true);
 	}
 
-	@Override
+    @Override
+    public void setVisible(final boolean pVisible, boolean recursively) {
+        this.mVisible = pVisible;
+        this.setEnabled(this.mVisible);
+        if (recursively) {
+            for (IEntity child : this.getChildren()) {
+                child.setVisible(this.mVisible);
+            }
+        }
+    }
+
+
+    @Override
 	public boolean isCullingEnabled() {
 		return this.mCullingEnabled;
 	}
@@ -1976,12 +1984,17 @@ public class Entity implements IEntity {
         this.onEnterHandler = onEnterHandler;
     }
 
+    @Override
     public boolean isEnabled() {
         return mEnabled;
     }
 
+    @Override
     public void setEnabled(boolean mEnabled) {
         this.mEnabled = mEnabled;
+        for (IEntity child : this.getChildren()) {
+            child.setEnabled(this.mVisible);
+        }
     }
 
     public Boolean isSwallowTouch() {

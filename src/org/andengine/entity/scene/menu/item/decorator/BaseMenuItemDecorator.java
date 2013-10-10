@@ -875,7 +875,12 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 		this.mMenuItem.setVisible(pVisible);
 	}
 
-	@Override
+    @Override
+    public void setVisible(boolean pVisible, boolean recursively) {
+        this.mMenuItem.setVisible(pVisible);
+    }
+
+    @Override
 	public boolean isCulled(final Camera pCamera) {
 		return this.mMenuItem.isCulled(pCamera);
 	}
@@ -988,6 +993,16 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
     @Override
     public void setPool(EntityPool pool) {
         this.mMenuItem.setPool(pool);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.mMenuItem.isEnabled();
+    }
+
+    @Override
+    public void setEnabled(boolean mEnabled) {
+        this.mMenuItem.setEnabled(mEnabled);
     }
 
     @Override

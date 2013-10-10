@@ -60,6 +60,7 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable {
 
     public boolean isVisible();
 	public void setVisible(final boolean pVisible);
+	public void setVisible(final boolean pVisible, boolean recursively);
 
 	public boolean isIgnoreUpdate();
 	public void setIgnoreUpdate(boolean pIgnoreUpdate);
@@ -455,6 +456,9 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable {
     public  boolean         hasOnEnterHandler();
     public  OnEnterHandler  getOnEnterHandler();
     public  void            resetOnEnter();
+
+    public boolean isEnabled();
+    public void setEnabled(boolean mEnabled);
 
     public interface OnEnterHandler {
         /**
