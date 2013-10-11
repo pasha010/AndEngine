@@ -1035,6 +1035,11 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
         this.mMenuItem.resetOnEnter();
     }
 
+    @Override
+    public void setEnabled(boolean mEnabled, boolean recursively) {
+        this.mMenuItem.setEnabled(mEnabled, recursively);
+    }
+
     // ===========================================================
 	// Methods
 	// ===========================================================

@@ -237,7 +237,7 @@ public class Entity implements IEntity {
     @Override
     public void setVisible(final boolean pVisible, boolean recursively) {
         this.mVisible = pVisible;
-        this.setEnabled(this.mVisible);
+        this.setEnabled(this.mVisible, recursively);
         if (recursively) {
             for (IEntity child : this.getChildren()) {
                 child.setVisible(this.mVisible);
@@ -1990,10 +1990,17 @@ public class Entity implements IEntity {
     }
 
     @Override
-    public void setEnabled(boolean mEnabled) {
+    public void setEnabled(boolean enabled) {
+        this.setEnabled(enabled, true);
+    }
+
+    @Override
+    public void setEnabled(boolean mEnabled, boolean recursively) {
         this.mEnabled = mEnabled;
-        for (IEntity child : this.getChildren()) {
-            child.setEnabled(this.mVisible);
+        if (recursively) {
+            for (IEntity child : this.getChildren()) {
+                child.setEnabled(this.mVisible);
+            }
         }
     }
 

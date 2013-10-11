@@ -457,8 +457,9 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable {
     public  OnEnterHandler  getOnEnterHandler();
     public  void            resetOnEnter();
 
-    public boolean isEnabled();
-    public void setEnabled(boolean mEnabled);
+    public boolean  isEnabled();
+    public void     setEnabled(boolean enabled);
+    public void     setEnabled(boolean enabled, boolean recursively);
 
     public interface OnEnterHandler {
         /**
