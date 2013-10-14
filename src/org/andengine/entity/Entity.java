@@ -231,20 +231,9 @@ public class Entity implements IEntity {
 
 	@Override
 	public void setVisible(final boolean pVisible) {
-        this.setVisible(pVisible, true);
-	}
-
-    @Override
-    public void setVisible(final boolean pVisible, boolean recursively) {
         this.mVisible = pVisible;
-        this.setEnabled(this.mVisible, recursively);
-        if (recursively) {
-            for (IEntity child : this.getChildren()) {
-                child.setVisible(this.mVisible);
-            }
-        }
-    }
-
+        this.setEnabled(this.mVisible);
+	}
 
     @Override
 	public boolean isCullingEnabled() {

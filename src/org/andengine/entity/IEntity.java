@@ -60,7 +60,6 @@ public interface IEntity extends IDrawHandler, IUpdateHandler, IDisposable {
 
     public boolean isVisible();
 	public void setVisible(final boolean pVisible);
-	public void setVisible(final boolean pVisible, boolean recursively);
 
 	public boolean isIgnoreUpdate();
 	public void setIgnoreUpdate(boolean pIgnoreUpdate);

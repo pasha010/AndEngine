@@ -876,11 +876,6 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 	}
 
     @Override
-    public void setVisible(boolean pVisible, boolean recursively) {
-        this.mMenuItem.setVisible(pVisible);
-    }
-
-    @Override
 	public boolean isCulled(final Camera pCamera) {
 		return this.mMenuItem.isCulled(pCamera);
 	}
