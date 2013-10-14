@@ -711,7 +711,12 @@ public abstract class BaseMenuItemDecorator implements IMenuItem {
 		return this.mMenuItem.getChildByTag(pTag);
 	}
 
-	public IEntity getChildByIndex(final int pIndex) {
+    @Override
+    public List<IEntity> getChildrenByTag(int pTag) {
+        return this.mMenuItem.getChildrenByTag(pTag);
+    }
+
+    public IEntity getChildByIndex(final int pIndex) {
 		return this.mMenuItem.getChildByIndex(pIndex);
 	}
 

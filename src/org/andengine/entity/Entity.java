@@ -910,7 +910,23 @@ public class Entity implements IEntity {
 		return this.mChildren.size();
 	}
 
-	@Override
+    @Override
+    public List<IEntity> getChildrenByTag(int pTag) {
+        if (this.mChildren == null) {
+            return null;
+        }
+
+        List<IEntity> children = new ArrayList<>();
+
+        for (final IEntity child : this.mChildren) {
+            if (child.getTag() == pTag) {
+                children.add(child);
+            }
+        }
+        return children;
+    }
+
+    @Override
 	public IEntity getChildByTag(final int pTag) {
 		if (this.mChildren == null) {
 			return null;
